@@ -89,7 +89,7 @@ class Database:
             is_employee = ?
             last_logon = ?
         where
-            id = ?
+            id = ? ;
         """
 
         try:
@@ -100,8 +100,21 @@ class Database:
             # let's iterate through the people in the program
             # and send them to the db
             for person in self.people:
-                data = ()
+                data = (person.first_name,
+                        person.last_name,
+                        person.address,
+                        person.phone,
+                        person.email,
+                        person.notes,
+                        person.username,
+                        person.password,
+                        person.is_employee,
+                        person.is_admin,
+                        person.id
+                        )
                 cur.execute(sql_query, data)
+
+            conn.commit()
 
             result = True
 
@@ -112,4 +125,3 @@ class Database:
 
         conn.close()  # close the database
         return result
-

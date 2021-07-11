@@ -101,7 +101,7 @@ class Database:
             # and send them to the db
             for person in self.people:
                 data = ()
-                cur.execute(sql_query data)
+                cur.execute(sql_query, data)
 
             result = True
 

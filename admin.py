@@ -17,7 +17,6 @@ class Person:
                  is_admin: bool = False,
                  notes: str = "Empty note.",
                  is_active: bool = True) -> None:
-
         self.first_name = first_name
         self.last_name = last_name
         self.address = address
@@ -30,6 +29,44 @@ class Person:
         self.last_logon = None
         self.notes = notes
         self.is_active = is_active
+
+
+class Item:
+
+    def __init__(self,
+                 name: str = "item",
+                 checked_in_by: str = "default",
+                 customer: str = "",
+                 weight: float = 0.0,
+                 volume: float = 0.0,
+                 price: int = 100,
+                 paid: bool = False,
+                 description: str = "default item",
+                 origin: str = "origin",
+                 destination: str = "destination") -> None:
+        self.name = name
+        self.checked_in_by = checked_in_by
+        self.customer = customer
+        self.weight = weight
+        self.volume = volume
+        self.price = price  # make sure this is an integer for rounding errors with reals
+        self.paid = paid
+        self.description = description
+        self.origin = origin
+        self.destination = destination
+
+
+class Place:
+
+    def __init__(self,
+                 name: str = "Anytown USA",
+                 description: str = "middle of nowhere",
+                 airport_code: str = "PANC",
+                 price: int = 0) -> None:
+        self.name = name
+        self.description = description
+        self.airport_code = airport_code
+        self.price = price  # again make sure this is an integer to eliminate rounding errors
 
 
 class Database:
@@ -46,7 +83,9 @@ class Database:
 
         # i repeat the following code multiple times for items and places
         # why?  because I haven't refactored it yet - also because I'm lazy
-        # change when able
+        # change when able, make this programmatic or whatever, for now, yeah
+        # also I'm not sure if this would be come a mess of dependencies either
+        # seems easier just to be explicit about what we're doing here.
         try:
             # connect to the database
             conn = sqlite3.connect(Database.location)
@@ -73,10 +112,72 @@ class Database:
 
                 self.people[person.username] = person
 
-            conn.close() # close the database
+            conn.close()  # close the database
 
         except sqlite3.Error as e:
             print("Error loading people.  See following error:")
+            print(e)
+
+        # now let's connect to the database again and snag the items
+        # we use a try/except here as shitty error handling
+        # we need a new SQL Query - let's make another one
+        sql_query = 'select * from items'
+        try:
+            # connect to the database...again
+            conn = sqlite3.connect(Database.location)
+            cur = conn.cursor()
+
+            # let's execute the query listed outside of the try
+            cur.execute(sql_query)
+            rows = cur.fetchall()  # get all the rows
+
+            for row in rows:
+                # Iterate through all the rodes, make a new node with the lat_lons
+                item = Item()
+                item.name = row[0]
+                item.checked_in_by = row[1]
+                item.customer = row[2]
+                item.weight = row[3]
+                item.volume = row[4]
+                item.price = row[5]
+                item.paid = bool(row[6])
+                item.description = row[7]
+                item.origin = row[8]
+                item.destination = row[9]
+
+                self.items[item.name] = item
+
+            conn.close()  # close the database
+
+        except sqlite3.Error as e:
+            print("Error loading items.  See following error:")
+            print(e)
+
+        # same thing as above but we're get the places
+        sql_query = 'select * from place'
+        try:
+            # connect to the database...again
+            conn = sqlite3.connect(Database.location)
+            cur = conn.cursor()
+
+            # let's execute the query listed outside of the try
+            cur.execute(sql_query)
+            rows = cur.fetchall()  # get all the rows
+
+            for row in rows:
+                # Iterate through all the rodes, make a new node with the lat_lons
+                place = Place()
+                place.name = row[0]
+                place.description = row[1]
+                place.airport_code = row[2]
+                place.price = row[3]
+
+                self.places[place.name] = place
+
+            conn.close()  # close the database
+
+        except sqlite3.Error as e:
+            print("Error loading places.  See following error:")
             print(e)
 
     def save_people(self) -> bool:
@@ -130,6 +231,101 @@ class Database:
         except sqlite3.Error as e:
             print("Error updating people database.  See following error:")
             print(e)
-            result =  False
+            result = False
+
+        return result
+
+    def save_items(self) -> bool:
+        # now we'll put all the items bak into the db
+        # first let's write the SQL to update the db
+        sql_query = """
+        insert or replace into items (
+            name,
+            checked_in_by,
+            customer,
+            weight,
+            volume,
+            price,
+            paid,
+            description,
+            origin,
+            destination)
+        values (?,?,?,?,?,?,?,?,?,?);
+        """
+
+        try:
+            # connect to the database
+            conn = sqlite3.connect(Database.location)
+            cur = conn.cursor()
+
+            # let's iterate through the people in the program
+            # and send them to the db
+
+            for entry in self.items:
+                item = self.items[entry] # the key is the var entry
+                data = (item.name,
+                        item.checked_in_by,
+                        item.customer,
+                        item.weight,
+                        item.volume,
+                        item.price,
+                        item.paid,
+                        item.destination,
+                        item.origin,
+                        item.destination
+                        )
+                cur.execute(sql_query, data)
+
+            conn.commit()
+            conn.close()
+
+            result = True
+
+        except sqlite3.Error as e:
+            print("Error updating items database.  See following error:")
+            print(e)
+            result = False
+
+        return result
+
+
+    def save_places(self) -> bool:
+        # now we'll save the places
+        # first let's write the SQL to update the db
+        sql_query = """
+        insert or replace into place (
+            name,
+            description,
+            airport_code,
+            price)
+        values (?,?,?,?);
+        """
+
+        try:
+            # connect to the database
+            conn = sqlite3.connect(Database.location)
+            cur = conn.cursor()
+
+            # let's iterate through the people in the program
+            # and send them to the db
+
+            for entry in self.places:
+                place = self.places[entry] # the key is the var entry
+                data = (place.name,
+                        place.description,
+                        place.airport_code,
+                        place.price,
+                        )
+                cur.execute(sql_query, data)
+
+            conn.commit()
+            conn.close()
+
+            result = True
+
+        except sqlite3.Error as e:
+            print("Error updating plaes database.  See following error:")
+            print(e)
+            result = False
 
         return result

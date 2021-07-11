@@ -1,5 +1,4 @@
-# inventory
-Start of a simple inventory app.
+# inventory controller
 
 ### pat pragman
 

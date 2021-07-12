@@ -7,7 +7,7 @@ class Person:
     # Person class, contains everything you need to know
     # Default Values to give an idea of the db structure
     # password context is global to all "person classes"
-    pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"],
+    pwd_context = CryptContext(schemes=["pbkdf2_sha256"],
                                deprecated="auto",
                                )  # this is the password context for passlib
 
@@ -49,12 +49,29 @@ class Person:
 
         return result
 
+    def change_password(self, password: str, new_password: str) -> bool:
+
+        if self.verify_password(password):
+            # print("Password Updating!")  # debug
+            self.password = Person.pwd_context.hash(new_password)
+            self.update_log("password updated")
+            return True
+        else:
+            print("Password Update Failed")
+            self.update_log("password update attempt failed.")
+            return False
+
+    def update_log(self, event: str = "default log event", by: str="sofware") -> None:
+        right_now = str(datetime.datetime.now())
+        self.log = event + " " + right_now+ " by " + by
+
     def log_dump(self) -> None:
         print(self.log)
         return self.log
 
     def log_purge(self, by="software") -> None:
-        self.log = "Logs purged at " + str(datetime.datetime.now()) + " by " + by
+        self.log = ""
+        self.update_log("Logs purged", by=by)
 
 
 

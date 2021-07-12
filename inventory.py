@@ -15,15 +15,19 @@ db.people[randy_q.username] = randy_q""
 db.save_people()
 """
 
-"""randy_q = db.people["randy_q"]
+randy_q = db.people["randy_q"]
 bob_s = db.people["randy_q"]
 
-print(bob_s.verify_password("1"))
-print(bob_s.verify_password("2"))
-print(randy_q.verify_password("1"))
+"""print(randy_q.change_password("2", "hello_world"))
+print(randy_q.change_password("2", "wtf"))
 print(randy_q.verify_password("2"))
+print(randy_q.verify_password("hello_world"))
+print(randy_q.verify_password("wtf"))
+
 db.save_people()
+randy_q.log_dump()"""
 
-randy_q.log_dump()
-
-"""
+print(randy_q.password)
+print(randy_q.verify_password("1"))
+print(randy_q.verify_password("hello_world"))
+print(randy_q.verify_password("wtf"))

@@ -1,10 +1,16 @@
 import sqlite3
-import passlib
+from passlib.context import  CryptContext
+import datetime
 
 
 class Person:
     # Person class, contains everything you need to know
     # Default Values to give an idea of the db structure
+    # password context is global to all "person classes"
+    pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"],
+                               deprecated="auto",
+                               )  # this is the password context for passlib
+
     def __init__(self,
                  first_name: str = "Guy",
                  last_name: str = "Manderson",
@@ -12,7 +18,7 @@ class Person:
                  phone: str = "555-555-5555",
                  email: str = "gmanderson@gmail.com",
                  username: str = "gman",
-                 password: str = "unhashed_mess",
+                 password: str = pwd_context.hash("default_garbage"),
                  is_employee: bool = False,
                  is_admin: bool = False,
                  notes: str = "Empty note.",
@@ -23,12 +29,33 @@ class Person:
         self.phone = phone
         self.email = email
         self.username = username
-        self.password = password
+        self.password = Person.pwd_context.hash(password)
         self.is_employee = is_employee
         self.is_admin = is_admin
         self.last_logon = None
         self.notes = notes
         self.is_active = is_active
+        self.log = "Log: \n"
+
+    def verify_password(self, password: str) -> bool:
+        result = Person.pwd_context.verify(password, self.password)
+        event_time = str(datetime.datetime.now())  # make a string object to record the time of the last attempt
+
+        if result:
+            self.last_logon = event_time  # password verified
+            self.log = str(self.log) + "\nPassword Verified at:" + str(event_time)
+        else:
+            self.log = str(self.log) + "\nPassword verification failure at:" + str(event_time)
+
+        return result
+
+    def log_dump(self) -> None:
+        print(self.log)
+        return self.log
+
+    def log_purge(self, by="software") -> None:
+        self.log = "Logs purged at " + str(datetime.datetime.now()) + " by " + by
+
 
 
 class Item:
@@ -109,6 +136,8 @@ class Database:
                 person.is_employee = bool(row[8])
                 person.is_admin = bool(row[9])
                 person.last_logon = row[10]
+                person.is_active = row[11]
+                person.log = row[12]
 
                 self.people[person.username] = person
 
@@ -195,8 +224,9 @@ class Database:
             password,
             is_employee,
             last_logon,
-            is_active)
-        values (?,?,?,?,?,?,?,?,?,?,?);
+            is_active,
+            log)
+        values (?,?,?,?,?,?,?,?,?,?,?, ?);
         """
 
         try:
@@ -219,7 +249,8 @@ class Database:
                         person.password,
                         person.is_employee,
                         person.is_admin,
-                        int(person.is_active)
+                        int(person.is_active),
+                        person.log
                         )
                 cur.execute(sql_query, data)
 
@@ -288,7 +319,6 @@ class Database:
 
         return result
 
-
     def save_places(self) -> bool:
         # now we'll save the places
         # first let's write the SQL to update the db
@@ -329,3 +359,7 @@ class Database:
             result = False
 
         return result
+
+    def is_in_db(self, username) -> bool:
+        # takes a username and looks to see if it's in the db
+        return username in self.people

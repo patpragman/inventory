@@ -4,21 +4,26 @@
 
 from admin import *
 
-print("hello world...")
-# test change git!
-
 db = Database()
 
-"""dude = Person(username="thirdly_thirerson")
+"""bob_s = Person(username="bob_s", password="1")
+randy_q = Person(username="randy_q", password="2")
 
-thing = Item()
-other_thing = Item(name="other_thing")
-third_thing = Item(name="third_thing")
+db.people[bob_s.username] = bob_s
+db.people[randy_q.username] = randy_q""
 
-place = Place()
+db.save_people()
+"""
 
-db.people[dude.username] = dude
-db.items[thing.name] = thing
-db.items[other_thing.name] = other_thing
-db.items[third_thing.name] = third_thing
-db.places[place.name] = place"""
+"""randy_q = db.people["randy_q"]
+bob_s = db.people["randy_q"]
+
+print(bob_s.verify_password("1"))
+print(bob_s.verify_password("2"))
+print(randy_q.verify_password("1"))
+print(randy_q.verify_password("2"))
+db.save_people()
+
+randy_q.log_dump()
+
+"""

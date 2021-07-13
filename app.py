@@ -10,6 +10,7 @@ db = Database()
 atexit.register(db.save_people)  # save people
 atexit.register(db.save_items)  # save items
 atexit.register(db.save_places)  # save people
+# backups should be handled by a shell script
 
 
 @app.route("/")

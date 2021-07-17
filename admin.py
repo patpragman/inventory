@@ -191,7 +191,7 @@ class Database:
             rows = cur.fetchall()  # get all the rows
 
             for row in rows:
-                # Iterate through all the rodes, make a new node with the lat_lons
+                # Iterate through all the rows, build a new item for each one
                 item = Item()
                 item.name = row[0]
                 item.checked_in_by = row[1]
@@ -209,7 +209,7 @@ class Database:
                 when I refactor things a bit later this will move up in both the DB and in the mapping code
                 but for now this is fine."""
 
-                self.items[item.name] = item
+                self.items[item.id] = item
 
             conn.close()  # close the database
 
@@ -305,7 +305,7 @@ class Database:
         # now we'll put all the items bak into the db
         # first let's write the SQL to update the db
         sql_query = """
-        insert or replace into items (
+        insert or replace into item (
             name,
             checked_in_by,
             customer,
@@ -315,8 +315,9 @@ class Database:
             paid,
             description,
             origin,
-            destination)
-        values (?,?,?,?,?,?,?,?,?,?);
+            destination,
+            id)
+        values (?,?,?,?,?,?,?,?,?,?,?);
         """
 
         try:
@@ -338,7 +339,8 @@ class Database:
                         item.paid,
                         item.destination,
                         item.origin,
-                        item.destination
+                        item.destination,
+                        item.id
                         )
                 cur.execute(sql_query, data)
 
@@ -398,3 +400,11 @@ class Database:
     def is_in_db(self, username) -> bool:
         # takes a username and looks to see if it's in the db
         return username in self.people
+
+    def max_item_id(self) -> int:
+
+        if len(self.items) == 0:
+            return 0
+        else:
+            return max([self.items[i].id for i in self.items])
+

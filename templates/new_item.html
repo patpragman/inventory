@@ -4,35 +4,37 @@
 </title>
 <body>
     <h3>Create a new item!</h3>
-<form>
-    <p>Item Name: <input name="name"></p>
-    <p>Current User: {{person.first_name}} {{person.last_name}}</p>
+<form action="/new_item" method="POST">
+    <p>Quick title: <input name="name"></p>
+    <p>Current User: {{person.first_name}} {{person.last_name}} - username {{person.username}}</p>
+    <h3>Checked in by:</h3>
     <select id="checked_in_by" name="checked_in_by">
-        {% for p in people %}
-        <option value="{{p.username}}">{{p.first_name}} {{p.last_name}}</option>
+        {% for dude in people %}
+        <option value="{{dude.username}}">{{dude.first_name}} {{dude.last_name}}</option>
         {% endfor %}}
     </select>
+    <h3>Customer:</h3>
     <select id="customer" name="customer">
-        {% for p in people %}
-        <option value="{{p.username}}">{{p.first_name}} {{p.last_name}}</option>
+        {% for customer in people %}
+        <option value="{{customer.username}}">{{customer.first_name}} {{customer.last_name}}</option>
         {% endfor %}}
     </select>
     <p>Weight: <input id="weight" type="number" name="weight" value="1" > lbs</p>
     <p>Price:  $<input id="price" type="number" name="price" value=10></p>
     <textarea id="description" name="description" rows=4 cols=100>Enter a description.</textarea>
-    <p>Origin:</p>
+    <h3>Origin:</h3>
     <select id="origin" name="origin">
         {% for place in places %}
         <option value="{{ place.name }}">{{ place.name }} {{ place.airport_code }}</option>
         {% endfor %}}
     </select>
-    <p>Destination:</p>
+    <h3>Destination:</h3>
     <select id="destination" name="destination">
         {% for place in places %}
         <option value="{{place.name}}">{{place.name}} {{place.airport_code}}</option>
         {% endfor %}}
     </select>
-
+    <input type="submit">
 </form>
 </body>
 </html>

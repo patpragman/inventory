@@ -253,15 +253,46 @@ def new_item() -> str:
     global db
     # if you're getting a page from the server - render the appropriate template
     if request.method == "GET":
-        print(db.places)
-        print(db.people)
+        places_list = []
+        people_list = []
+        for place in db.places:
+            places_list.append(db.places[place])
+        for person in db.people:
+            people_list.append(db.people[person])
+
         return render_template("/new_item.html",
                                 person=db.people[session["username"]],
-                                places=db.places,
-                                people=db.people)
+                                places=places_list,
+                                people=people_list)
+    elif request.method == "POST":
+        try:
+            # ok - if it's a post message, try to create a new item and add it to the cue
+            item = Item()
+
+            # we're going to make a new item, so let's figure out the highest numbered item first in the list
+            # so we don't accidentally assign a previously used value
+            # also, this can screw you over if there are no items in the database
+            new_id = db.max_item_id() + 1
+            item.id = new_id
+            item.name = request.form["name"]
+            item.checked_in_by = request.form["checked_in_by"]
+            item.customer = request.form["customer"]
+            item.weight = request.form["weight"]
+            item.price = request.form["price"]
+            item.description = request.form["description"]
+            item.origin = request.form["origin"]
+            item.destination = request.form["destination"]
+            db.items[item.id] = item
+
+            return redirect("/control_panel")
+
+        except Exception as err:
+            print("Catastrophe!  Gnashing of teeth!  The following error occurred.")
+            print(err)
+            return str(err)
     else:
-        print("post not yet implemented")
-        return "WTF!"
+        print("POST and GET are the only acceptable requests.")
+        return "POST and GET are the only acceptable requests."
 
 
 @app.route("/logout")

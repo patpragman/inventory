@@ -248,6 +248,22 @@ def edit_personal_user() -> str:
         print(err)
         redirect("/")
 
+@app.route("/new_item", methods=["post", "get"])
+def new_item() -> str:
+    global db
+    # if you're getting a page from the server - render the appropriate template
+    if request.method == "GET":
+        print(db.places)
+        print(db.people)
+        return render_template("/new_item.html",
+                                person=db.people[session["username"]],
+                                places=db.places,
+                                people=db.people)
+    else:
+        print("post not yet implemented")
+        return "WTF!"
+
+
 @app.route("/logout")
 def logout() -> None:
 

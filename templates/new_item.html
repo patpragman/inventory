@@ -1,0 +1,38 @@
+<html>
+<title>
+    New Item
+</title>
+<body>
+    <h3>Create a new item!</h3>
+<form>
+    <p>Item Name: <input name="name"></p>
+    <p>Current User: {{person.first_name}} {{person.last_name}}</p>
+    <select id="checked_in_by" name="checked_in_by">
+        {% for p in people %}
+        <option value="{{p.username}}">{{p.first_name}} {{p.last_name}}</option>
+        {% endfor %}}
+    </select>
+    <select id="customer" name="customer">
+        {% for p in people %}
+        <option value="{{p.username}}">{{p.first_name}} {{p.last_name}}</option>
+        {% endfor %}}
+    </select>
+    <p>Weight: <input id="weight" type="number" name="weight" value="1" > lbs</p>
+    <p>Price:  $<input id="price" type="number" name="price" value=10></p>
+    <textarea id="description" name="description" rows=4 cols=100>Enter a description.</textarea>
+    <p>Origin:</p>
+    <select id="origin" name="origin">
+        {% for place in places %}
+        <option value="{{ place.name }}">{{ place.name }} {{ place.airport_code }}</option>
+        {% endfor %}}
+    </select>
+    <p>Destination:</p>
+    <select id="destination" name="destination">
+        {% for place in places %}
+        <option value="{{place.name}}">{{place.name}} {{place.airport_code}}</option>
+        {% endfor %}}
+    </select>
+
+</form>
+</body>
+</html>

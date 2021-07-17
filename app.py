@@ -45,7 +45,7 @@ def main() -> str:
         print(username, password) # debug
         if username in db.people:
             if db.people[username].verify_password(password):
-                print("Authentication success", username, password)  # debug
+                #  print("Authentication success", username, password)  # debug
                 person = db.people[username]
                 person.last_logon = str(datetime.datetime.now())
                 person.log = person.update_log("Logged in at " + person.last_logon, "Login form")
@@ -53,11 +53,14 @@ def main() -> str:
             else:
                 return render_template("/login.html", message="Authentication Failed")
         else:
-            return render_template("/login.html", message="Username not found.  Please try again.")
+            raise UnknownUserError(username)
     except Exception as e:
-        print("There was an error:")
-        print(e)
-        return render_template("/login.html", message="Not logged in, please log in.")
+        if isinstance(e, UnknownUserError):
+            return render_template("/login.html", message="Username not found.  Please try again.")
+        else:
+            print("There was an unkown error:")
+            print(e)
+            return render_template("/login.html", message="Not logged in, please log in.")
 
 
 @app.route("/validate", methods=["post"])
@@ -68,6 +71,16 @@ def validate():
         # print("Attempting validation")  # debug
         username = request.form["username"]
         password = request.form["password"]
+
+        # if either of the values from the form are missing
+        # then throw an error
+        if username == "" or password == "":
+            raise BlankValueError("Username or Password is blank.")
+
+        # similarly, if the username isn't in the database throw an error
+        if username not in db.people:
+            raise UnknownUserError(username)
+
         # print(username, password)  # debug
         session["username"] = username
         session["password"] = password
@@ -79,8 +92,13 @@ def validate():
         else:
             return redirect("/")
     except Exception as e:
-        print(e)
-        return redirect("/login")
+        if isinstance(e, UnknownUserError):
+            return render_template("/login.html", message="Username not found.  Please try again.")
+        elif isinstance(e, BlankValueError):
+            return render_template("/login.html", message = str(e))
+        else:
+            print(e)
+            return redirect("/login")
 
 
 @app.route("/login")
@@ -169,6 +187,56 @@ def amend_personal_data() -> str:
         else:
             return redirect("/login")
 
+@app.route("/new_user", methods=["post", "get"])
+def new_user() -> str:
+    global db
+    # again check to see if the user is logged in, otherwise send them back to login
+    if request.method == "POST":
+        try:
+            person = Person()
+            # this code is very similar to the amend user code
+            # however you aren't checking session data because you're a new user
+
+            if request.form["username"] in db.people:
+                # if the user is user is already in the db, raise a flag
+                raise DucplicateUserError(request.form["username"], "new user")
+
+            person.username = request.form["username"]
+            new_password = request.form["password"]
+            verify_pass = request.form["verify_pass"]
+            person.first_name = request.form["first_name"]
+            person.last_name = request.form["last_name"]
+            person.phone = request.form["phone"]
+            person.address = request.form["address"]
+            person.email = request.form["email"]
+            person.notes = request.form["notes"]
+            person.log = person.update_log("Created new user", by=person.username)
+            # now we have to change the underlying object in the db
+            db.people[person.username] = person
+            session["username"] = person.username
+            session["password"] = person.password
+
+            if new_password == verify_pass:
+               # print("Password changed!")  # debug
+                person.change_password(new_password)
+                person.update_log("Password changed", by=person.username)
+            else:
+                return render_template("new_user.html",
+                                       message="Error updating passwords, please try again.")
+            # now go back to the control panel
+            db.people[person.username] = person
+            return redirect("/control_panel")
+
+
+        except Exception as err:
+            print(err)
+            if isinstance(err, DucplicateUserError):
+                return render_template("new_user.html",
+                                       message="Username already exists.",
+                                       person="new user")
+    else:
+        return render_template("new_user.html", message="Enter your information please!")
+
 @app.route("/edit_personal_user")
 def edit_personal_user() -> str:
     global db
@@ -179,13 +247,6 @@ def edit_personal_user() -> str:
     except Exception as err:
         print(err)
         redirect("/")
-
-
-
-@app.route("/new_user")
-def new_user() -> str:
-
-    return "New user logic to go here."
 
 @app.route("/logout")
 def logout() -> None:

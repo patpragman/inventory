@@ -45,21 +45,14 @@ class Person:
             self.last_logon = event_time  # password verified
             self.log = str(self.log) + "\nPassword Verified at:" + str(event_time)
         else:
-            self.log = str(self.log) + "\nPassword verification failure at:" + str(event_time)
+            self.log = str(self.log) + "\nPassword verification failure at: " + str(event_time)
+            print("Password verification failure at: " + str(event_time))
 
         return result
 
-    def change_password(self, password: str, new_password: str) -> bool:
-
-        if self.verify_password(password):
-            # print("Password Updating!")  # debug
+    def change_password(self, new_password: str) -> None:
             self.password = Person.pwd_context.hash(new_password)
             self.update_log("password updated")
-            return True
-        else:
-            print("Password Update Failed")
-            self.update_log("password update attempt failed.")
-            return False
 
     def update_log(self, event: str = "default log event", by: str="sofware") -> None:
         right_now = str(datetime.datetime.now())
@@ -72,7 +65,6 @@ class Person:
     def log_purge(self, by="software") -> None:
         self.log = ""
         self.update_log("Logs purged", by=by)
-
 
 
 class Item:
@@ -88,6 +80,7 @@ class Item:
                  description: str = "default item",
                  origin: str = "origin",
                  destination: str = "destination") -> None:
+        self.id = None  # start with blank id reference until the DB fills this out
         self.name = name
         self.checked_in_by = checked_in_by
         self.customer = customer
@@ -111,6 +104,26 @@ class Place:
         self.description = description
         self.airport_code = airport_code
         self.price = price  # again make sure this is an integer to eliminate rounding errors
+
+
+class Cart:
+
+    def __init__(self):
+        """the cart class is a little data let's you stage items for checkout, nothing crazy
+        here but I don't think we should store each potential stack of items you wish
+        to check out in the database persistently.  Having this be persistent between sessions is not
+        to crazy.  We can revisit this later if it becomes an issue - but typically in my
+        experience typically carts are formed on adhoc basis and are quick to be filled.  Rarely
+        are they kept for multiple days.  This may require change but shouldn't be too crazy because
+        the stuff going into the "cart" are members of the item
+        class"""
+
+        def __init(self) -> None:
+
+            self.description = "Generic Cart"  # this should be editable by the user
+            self.items = [Item]  # this should be a list of items
+            self.creator: Person = None
+
 
 
 class Database:
@@ -167,7 +180,7 @@ class Database:
         # now let's connect to the database again and snag the items
         # we use a try/except here as shitty error handling
         # we need a new SQL Query - let's make another one
-        sql_query = 'select * from items'
+        sql_query = 'select * from item'
         try:
             # connect to the database...again
             conn = sqlite3.connect(Database.location)
@@ -190,6 +203,11 @@ class Database:
                 item.description = row[7]
                 item.origin = row[8]
                 item.destination = row[9]
+                item.id = row[10] 
+                """after much gnashing of teeth this ended up the last entry of the SQL db so that
+                it was easier to work with and I'd have to modify less code.  Sorry if this is confusing
+                when I refactor things a bit later this will move up in both the DB and in the mapping code
+                but for now this is fine."""
 
                 self.items[item.name] = item
 

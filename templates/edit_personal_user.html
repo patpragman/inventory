@@ -1,0 +1,37 @@
+<html>
+<head>
+    <title>Edit User</title>
+</head>
+<body>
+<form action="/amend_personal_data" method="post">
+    <p>{{message}}</p>
+    <p>Username: <input type="text" name="username" value="{{person.username}}"></p>
+    <p>If you want to change your password, enter it below - otherwise input your current password in both fields.</p>
+    <p>New Password: <input type="password" name="password" id="new_password" oninput="check_match();"></p>
+    <p>Verify Password: <input type="password" name="verify_pass" oninput="check_match();" id="check"></p>
+    <p>First name: <input type="text" name="first_name" value="{{person.first_name}}"></p>
+    <p>Last name: <input type="text" name="last_name" value="{{person.last_name}}"></p>
+    <p>Phone:  <input type="text" name="phone" value="{{person.phone}}"></p>
+    <p>Email:  <input type="text" name="email" value="{{person.email}}"></p>
+    <p>Notes: <textarea cols=50, rows=4 name="notes">{{person.notes}}</textarea></p>
+    <p>Address: <textarea cols=50, rows=4 name="address" >{{person.address}} </textarea></p>
+    <input id="submit_button" type="submit">
+</form>
+</body>
+<script>
+    function check_match() {
+        //check the password matches the verrification
+        new_password = document.getElementById("new_password").value;
+        verify_password = document.getElementById("check").value;
+        submit_button = document.getElementById("submit_button");
+
+        if (new_password != verify_password) {
+            submit_button.style.display = "none";
+        } else {
+            submit_button.style.display = "block";
+
+        }
+
+    }
+</script>
+</html>

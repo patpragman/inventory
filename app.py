@@ -1,4 +1,7 @@
 import atexit
+import datetime
+from errors import *
+
 from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
 from admin import *
@@ -21,27 +24,40 @@ SESSION_TYPE = "filesystem"
 app.config.from_object(__name__)  # I also have no idea what this is doing
 Session(app)  # this starts the session manager
 
+# carts are stored in this variable this should be persistent betwen sessions but doesn't need to be stored in the db
+carts = [Cart]
+
+
 @app.route("/")
 def main() -> str:
 
+    # the main page simply redirects you to the login page and does a little bit of logic to this
+    # end.  First, check if he user has a valid session cookie, then check if it authenticates
+    # if that works, redirect the user to the control panel for the application.  If there is no
+    # valid session cookie, tell the user to login.
+
     try:
+        # this is basically checking if the username and password have a session cookie
+        # the logic is handled with the try except - if the session cookie is there, proceed
+        # otherwise, just render the login template with a message
         username = session["username"]
         password = session["password"]
+        print(username, password) # debug
         if username in db.people:
             if db.people[username].verify_password(password):
-                print("Authentication success")
-                return "Logged in as " + username
+                print("Authentication success", username, password)  # debug
+                person = db.people[username]
+                person.last_logon = str(datetime.datetime.now())
+                person.log = person.update_log("Logged in at " + person.last_logon, "Login form")
+                return redirect("/control_panel")
             else:
-                print("Authentication Failed")
-                return redirect("/login")
+                return render_template("/login.html", message="Authentication Failed")
         else:
-            print("user not found")
-            return redirect("/login")
+            return render_template("/login.html", message="Username not found.  Please try again.")
     except Exception as e:
         print("There was an error:")
         print(e)
-
-    return "Main page. Goes here."
+        return render_template("/login.html", message="Not logged in, please log in.")
 
 
 @app.route("/validate", methods=["post"])
@@ -56,8 +72,12 @@ def validate():
         session["username"] = username
         session["password"] = password
         # print(session["username"], session["password"])  # debug
+        person = db.people[username]
 
-        return redirect("/")
+        if person.verify_password(password):
+            return redirect("/control_panel")
+        else:
+            return redirect("/")
     except Exception as e:
         print(e)
         return redirect("/login")
@@ -66,7 +86,7 @@ def validate():
 @app.route("/login")
 def login() -> str:
 
-    return render_template("login.html")
+    return render_template("login.html", message="Please Log in.")
 
 
 @app.route("/user_list")
@@ -76,10 +96,102 @@ def user_list() -> str:
     return output
 
 
+@app.route("/control_panel")
+def control_panel() -> str:
+    global db
+    # again check to see if the user is logged in, otherwise send them back to login
+    try:
+        #  print(session["username"])  # debug
+        person = db.people[session["username"]]
+        return render_template("/control_panel.html", person=person)
+
+    except Exception as e:
+        print(e)
+        return redirect("/")
+
+
+@app.route("/amend_personal_data", methods=["post"])
+def amend_personal_data() -> str:
+    global db
+    # again check to see if the user is logged in, otherwise send them back to login
+    try:
+        person = db.people[session["username"]]
+
+        # if that worked without throwing an exception - go through and update this data
+        # now let's verify that username isn't already in the db
+        """print("Trying to evaluate the form.")  # debug code
+        for form_data in request.form:
+            print(form_data, request.form[form_data])"""
+
+        if request.form["username"] in db.people:
+            # if the desired is not the user's name already
+            if request.form["username"] != person.username:
+                # if the username is already in use raise a specific error to take you
+                # back to the appropriate page
+                raise DucplicateUserError(request.form["username"], person.username)
+
+        # take all the post data and jam it into the person object
+        old_name = person.username
+        person.username = request.form["username"]
+
+        new_password = request.form["password"]
+        verify_pass = request.form["verify_pass"]
+        if new_password == verify_pass:
+            print("Password changed!")  # debug
+            person.change_password(new_password)
+            person.update_log("Password changed", by=person.username)
+        else:
+            return render_template("edit_personal_user.html",
+                                   person=person,
+                                   message="Error updating passwords, please try again.")
+
+        person.first_name = request.form["first_name"]
+        person.last_name = request.form["last_name"]
+        person.phone = request.form["phone"]
+        person.address = request.form["address"]
+        person.email = request.form["email"]
+        person.notes = request.form["notes"]
+        person.log = person.update_log("Updated personal details", by=person.username)
+        # now we have to change the underlying object in the db
+        db.people.pop(old_name)
+        db.people[person.username] = person
+        session["username"] = person.username
+        session["password"] = person.password
+        # now go back to the control panel
+        return redirect("/control_panel")
+
+    except Exception as err:
+        print(err)
+        if isinstance(err, DucplicateUserError):
+            return render_template("edit_personal_user.html",
+                                   message="Username already exists.",
+                                   person=db.people[err.attempting_user])
+        else:
+            return redirect("/login")
+
+@app.route("/edit_personal_user")
+def edit_personal_user() -> str:
+    global db
+
+    try:
+        person = db.people[session["username"]]
+        return render_template("edit_personal_user.html", person=person)
+    except Exception as err:
+        print(err)
+        redirect("/")
+
+
+
 @app.route("/new_user")
 def new_user() -> str:
 
-    return "New user."
+    return "New user logic to go here."
+
+@app.route("/logout")
+def logout() -> None:
+
+    session.clear()  # clear the session history then go back to the main page
+    return redirect("/")
 
 
 # we'll use SSL to hide submitted passwords

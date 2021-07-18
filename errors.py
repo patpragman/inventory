@@ -27,3 +27,13 @@ class BlankValueError(Exception):
     def __str__(self) -> str:
 
         return "The server didn't recieve the required data.  " + self.note
+
+class InvalidPassword(Exception):
+
+    def __init__(self, attempted_user: str) -> None:
+
+        self.attempted_user = attempted_user
+
+    def __str__(self) -> str:
+
+        return "Invalid password attempt for logon: " + self.attempted_user

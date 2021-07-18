@@ -24,98 +24,81 @@ SESSION_TYPE = "filesystem"
 app.config.from_object(__name__)  # I also have no idea what this is doing
 Session(app)  # this starts the session manager
 
-# carts are stored in this variable this should be persistent betwen sessions but doesn't need to be stored in the db
+# carts are stored in this variable this should be persistent between sessions but doesn't need to be stored in the db
 carts = [Cart]
 
-
-@app.route("/")
+@app.route("/login", methods=["POST", "GET"])
+@app.route("/", methods=["POST", "GET"])
 def main() -> str:
+    global db
 
     # the main page simply redirects you to the login page and does a little bit of logic to this
     # end.  First, check if he user has a valid session cookie, then check if it authenticates
     # if that works, redirect the user to the control panel for the application.  If there is no
     # valid session cookie, tell the user to login.
 
-    try:
-        # this is basically checking if the username and password have a session cookie
-        # the logic is handled with the try except - if the session cookie is there, proceed
-        # otherwise, just render the login template with a message
-        username = session["username"]
-        password = session["password"]
-        print(username, password) # debug
-        if username in db.people:
-            if db.people[username].verify_password(password):
-                #  print("Authentication success", username, password)  # debug
-                person = db.people[username]
-                person.last_logon = str(datetime.datetime.now())
-                person.log = person.update_log("Logged in at " + person.last_logon, "Login form")
-                return redirect("/control_panel")
+    if request.method == "GET":
+        # first let's check to see if there's a session cookie
+        try:
+            # this is basically checking if the username and password have a session cookie
+            # the logic is handled with the try except - if the session cookie is there, proceed
+            # otherwise, just render the login template with a message
+            username = session["username"]
+            password = session["password"]
+            # if there's no session cookie for "username and password" this will throw an error - cool
+            # this takes us back to a blank login page.
+            # however, if there is session cookie and we've made it this far, let's try to login
+            # first check that the username from the session cookie is in the database
+            if username in db.people:
+                # if it actually is in the database, check the password
+                if db.people[username].verify_password(password):
+                    # if the password works then go ahead and log in and redirect to the control panel
+                    person = db.people[username]
+                    person.last_logon = str(datetime.datetime.now())
+                    person.log = person.update_log("Logged in at " + person.last_logon, "Login form")
+                    return redirect("/control_panel")
+                else:
+                    # in this case the password didn't work - render the login page with a message
+                    # stating that
+                    raise InvalidPassword(username)  # throw this error if you put the wrong username in
             else:
-                return render_template("/login.html", message="Authentication Failed")
-        else:
-            raise UnknownUserError(username)
-    except Exception as e:
-        if isinstance(e, UnknownUserError):
-            return render_template("/login.html", message="Username not found.  Please try again.")
-        else:
-            print("There was an unkown error:")
-            print(e)
-            return render_template("/login.html", message="Not logged in, please log in.")
+                raise UnknownUserError(username)
 
+        except Exception as login_error:
+            if isinstance(login_error, UnknownUserError):
+                return render_template("/login.html", message="Username not found.  Please try again.")
+            elif isinstance(login_error, InvalidPassword):
+                return render_template("/login.html", message="Authentication failed.  Check password.")
+            else:
+                return render_template("/login.html", message="Please log in.")
 
-@app.route("/validate", methods=["post"])
-def validate():
-    global db
-
-    try:
-        # print("Attempting validation")  # debug
-        username = request.form["username"]
-        password = request.form["password"]
-
-        # if either of the values from the form are missing
-        # then throw an error
-        if username == "" or password == "":
-            raise BlankValueError("Username or Password is blank.")
-
-        # similarly, if the username isn't in the database throw an error
-        if username not in db.people:
-            raise UnknownUserError(username)
-
-        # print(username, password)  # debug
-        session["username"] = username
-        session["password"] = password
-        # print(session["username"], session["password"])  # debug
-        person = db.people[username]
-
-        if person.verify_password(password):
-            return redirect("/control_panel")
-        else:
+    elif request.method == "POST":
+        # if you receive a post, make sure it's not blank, then reset then session variables
+        # we'll hold all this inside a try except so that we can catch any errors
+        try:
+            username = request.form["username"]
+            password = request.form["password"]
+            if username == "" or password == "":
+                raise BlankValueError("Username or Password is blank.")
+            # if we made it this far without throwing an error let's reset the session cookies
+            # and send the user back to the main page with a redirect
+            session["username"] = username
+            session["password"] = password
             return redirect("/")
-    except Exception as e:
-        if isinstance(e, UnknownUserError):
-            return render_template("/login.html", message="Username not found.  Please try again.")
-        elif isinstance(e, BlankValueError):
-            return render_template("/login.html", message = str(e))
-        else:
-            print(e)
-            return redirect("/login")
-
-
-@app.route("/login")
-def login() -> str:
-
-    return render_template("login.html", message="Please Log in.")
-
-
-@app.route("/user_list")
-def user_list() -> str:
-    # this is the start of
-    output = str([person for person in db.people])
-    return output
+        except Exception as posting_error:
+            if isinstance(posting_error, BlankValueError):
+                # if you didn't type anything in, render the login form again with a message
+                return render_template("/login.html", message=posting_error.note)
+            else:
+                print("There was an error during the post operation.")
+                print(posting_error)
+                return render_template("/login.html", message=posting_error)
+    else:
+        return "POST or GET are the only supported methods."
 
 
 @app.route("/control_panel")
-def control_panel() -> str:
+def control_panel():
     global db
     # again check to see if the user is logged in, otherwise send them back to login
     try:
@@ -187,6 +170,7 @@ def amend_personal_data() -> str:
         else:
             return redirect("/login")
 
+
 @app.route("/new_user", methods=["post", "get"])
 def new_user() -> str:
     global db
@@ -210,14 +194,14 @@ def new_user() -> str:
             person.address = request.form["address"]
             person.email = request.form["email"]
             person.notes = request.form["notes"]
-            person.log = person.update_log("Created new user", by=person.username)
+            person.update_log("Created new user", by=person.username)
             # now we have to change the underlying object in the db
             db.people[person.username] = person
             session["username"] = person.username
             session["password"] = person.password
 
             if new_password == verify_pass:
-               # print("Password changed!")  # debug
+                # print("Password changed!")  # debug
                 person.change_password(new_password)
                 person.update_log("Password changed", by=person.username)
             else:
@@ -227,7 +211,6 @@ def new_user() -> str:
             db.people[person.username] = person
             return redirect("/control_panel")
 
-
         except Exception as err:
             print(err)
             if isinstance(err, DucplicateUserError):
@@ -236,6 +219,7 @@ def new_user() -> str:
                                        person="new user")
     else:
         return render_template("new_user.html", message="Enter your information please!")
+
 
 @app.route("/edit_personal_user")
 def edit_personal_user() -> str:
@@ -247,6 +231,7 @@ def edit_personal_user() -> str:
     except Exception as err:
         print(err)
         redirect("/")
+
 
 @app.route("/new_item", methods=["post", "get"])
 def new_item() -> str:

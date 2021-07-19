@@ -4,10 +4,13 @@
 <h3>Welcome, {{person.username}}!</h3>
 <p>This is the user control panel.  You can do several things from here.  You can edit your profile, manage carts, items, places, and people in the database.  You can also get information.</p>
 <p><a href="/edit_personal_user">Edit your user profile. (ugly) </a></p>
+<div id="item_editor">
+
+</div>
 <p><a href="#">Edit other users. (broken)</a></p>
 <p><a href="#">Add items to a cart. (broken)</a> </p>
 <p><a href="#">Create a new a cart. (broken)</a> </p>
-<p><a href="#">Edit items. (broken)</a> </p>
+<p><a href="/edit_item">Edit items. (broken)</a> </p>
 <p><a href="/new_item">Create a new item. (Ugly)</a> </p>
 <p><a href="#">Edit places. (broken)</a> </p>
 <p><a href="#">Create a new place. (broken)</a> </p>
@@ -15,8 +18,9 @@
 <p><a href="#">Create new users. (broken)</a> </p>
 <p><a href="#">Get info.</a></p>
 <p><a href="/logout">Log out.</a></p>
-
-
-
 </body>
+<script src="{{ url_for('static', filename='editor.js') }}">
+    console.log("Is any of this fucking javascript running?");
+    document.getElementById("item_editor").innerText = get_request("/test");
+</script>
 </html>

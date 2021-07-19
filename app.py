@@ -102,14 +102,43 @@ def control_panel():
     global db
     # again check to see if the user is logged in, otherwise send them back to login
     try:
-        #  print(session["username"])  # debug
-        person = db.people[session["username"]]
+        try:
+            person = db.people[session["username"]]
+        except:
+            raise NotLoggedInError("There was an error while trying to get to the control panel page.")
+
         return render_template("/control_panel.html", person=person)
 
-    except Exception as e:
-        print(e)
+    except Exception as err:
+        # something happened when trying to load the session token
+        # rather, regardless don't redirect to the control panel in
+        # that case, send them somewhere else and try again
+        print(err)
         return redirect("/")
 
+
+@app.route("/edit_item", methods=["POST", "GET"])
+def edit_item() -> str:
+    global db
+
+    try:
+        if request.method == "GET":
+            #  print("received a get request")  # debug
+            # if it's a get request, render the editor template
+            # we're passing the user to the template,
+            # we're passing a list of people objects to the template
+            # and we're passing a list of item objects to the template
+            return render_template("edit_item.html",
+                                   user=db.people[session["username"]],
+                                   people=[db.people[person] for person in db.people],
+                                   items=[db.items[item] for item in db.items])
+        else:
+            # while we're implementing this, if anything breaks, panic and throw a flag
+            raise Exception
+    except Exception as err:
+        print("Error!")
+        print(err)
+        return "There was an error! " + err
 
 @app.route("/amend_personal_data", methods=["post"])
 def amend_personal_data() -> str:
@@ -170,7 +199,6 @@ def amend_personal_data() -> str:
         else:
             return redirect("/login")
 
-
 @app.route("/new_user", methods=["post", "get"])
 def new_user() -> str:
     global db
@@ -219,6 +247,7 @@ def new_user() -> str:
                                        person="new user")
     else:
         return render_template("new_user.html", message="Enter your information please!")
+
 
 
 @app.route("/edit_personal_user")

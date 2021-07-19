@@ -1,0 +1,39 @@
+<html>
+<head>
+    <title>
+        Edit Items
+    </title>
+</head>
+<body>
+<h3>Current User: {{user.first_name}} {{user.last_name}} - username {{user.username}}</h3>
+<p>You can edit items below - be advised, they do not save you click save.</p>
+{% for item in items %}
+<div style="border-width: 3px; border-color: black;" class="item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}}" id="{{item.id}}">
+
+    <!--Each item input box gets a form to submit that ties to an individual item in the db -->
+    <form action="#" >
+        <h3>Checked in by:</h3>
+        <select id="checked_in_by" name="checked_in_by">
+        {% for person in people %}
+        <option value="{{person.username}}" {% if person.username ==  item.checked_in_by %} selected {% endif %} >{{person.first_name}} {{person.last_name}}</option>
+        {% endfor %}}
+        </select>
+
+        <h3>Customer:</h3>
+        <select id="customer" name="customer">
+            {% for customer in people %}
+            <option value="{{customer.username}}"{% if customer.username ==  item.customer %} selected {% endif %}>{{customer.first_name}} {{customer.last_name}}</option>
+            {% endfor %}}
+        </select>
+
+        <div align="left">
+            <p>Weight: <input id="weight" type="number" name="weight" value={{ item.weight }} > lbs</p>
+            <p>Volume: </p>
+        </div>
+
+    </form>
+
+</div>
+{% endfor %}
+</body>
+</html>

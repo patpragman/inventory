@@ -37,3 +37,14 @@ class InvalidPassword(Exception):
     def __str__(self) -> str:
 
         return "Invalid password attempt for logon: " + self.attempted_user
+
+
+class NotLoggedInError(Exception):
+
+    def __init__(self, note) -> None:
+
+        self.note = note
+
+    def __str__(self) -> str:
+
+        return "Trying to access a page while not logged in. " + self.note

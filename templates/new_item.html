@@ -25,13 +25,13 @@
     <h3>Origin:</h3>
     <select id="origin" name="origin">
         {% for place in places %}
-        <option value="{{ place.name }}">{{ place.name }} {{ place.airport_code }}</option>
+        <option value="{{ place.airport_code }}">{{ place.name }} {{ place.airport_code }}</option>
         {% endfor %}}
     </select>
     <h3>Destination:</h3>
     <select id="destination" name="destination">
         {% for place in places %}
-        <option value="{{place.name}}">{{place.name}} {{place.airport_code}}</option>
+        <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
         {% endfor %}}
     </select>
     <input type="submit">

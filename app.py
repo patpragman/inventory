@@ -117,6 +117,7 @@ def control_panel():
         return redirect("/")
 
 
+
 @app.route("/edit_item", methods=["POST", "GET"])
 def edit_item() -> str:
     global db
@@ -131,14 +132,29 @@ def edit_item() -> str:
             return render_template("edit_item.html",
                                    user=db.people[session["username"]],
                                    people=[db.people[person] for person in db.people],
-                                   items=[db.items[item] for item in db.items])
+                                   items=[db.items[item] for item in db.items],
+                                   places=[db.places[place] for place in db.places])
+        elif request.method == "POST":
+            # if it's posting data, get the particular data it's posting and adjust the adjust the
+            # item in question
+            item = db.items[int(request.form["id"])]
+            item.name = request.form["name"]
+            item.description = request.form["description"]
+            item.origin = request.form["origin"]
+            item.destination = request.form["destination"]
+            item.checked_in_by = request.form["checked_in_by"]
+            item.customer = request.form["customer"]
+            item.weight = request.form["weight"]
+            return redirect("/edit_item")
+
+
         else:
             # while we're implementing this, if anything breaks, panic and throw a flag
             raise Exception
     except Exception as err:
         print("Error!")
         print(err)
-        return "There was an error! " + err
+        return "There was an error! " + str(err)
 
 @app.route("/amend_personal_data", methods=["post"])
 def amend_personal_data() -> str:
@@ -275,9 +291,10 @@ def new_item() -> str:
             people_list.append(db.people[person])
 
         return render_template("/new_item.html",
-                                person=db.people[session["username"]],
-                                places=places_list,
-                                people=people_list)
+                                   user=db.people[session["username"]],
+                                   people=[db.people[person] for person in db.people],
+                                   items=[db.items[item] for item in db.items],
+                                   places=[db.places[place] for place in db.places])
     elif request.method == "POST":
         try:
             # ok - if it's a post message, try to create a new item and add it to the cue
@@ -286,6 +303,7 @@ def new_item() -> str:
             # we're going to make a new item, so let's figure out the highest numbered item first in the list
             # so we don't accidentally assign a previously used value
             # also, this can screw you over if there are no items in the database
+
             new_id = db.max_item_id() + 1
             item.id = new_id
             item.name = request.form["name"]
@@ -298,7 +316,7 @@ def new_item() -> str:
             item.destination = request.form["destination"]
             db.items[item.id] = item
 
-            return redirect("/control_panel")
+            return redirect("/edit_item")
 
         except Exception as err:
             print("Catastrophe!  Gnashing of teeth!  The following error occurred.")

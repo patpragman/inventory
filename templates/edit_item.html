@@ -4,15 +4,56 @@
         Edit Items
     </title>
 </head>
+<style>
+
+    .item_edit_box {
+        background-color: aliceblue; /* this can be changed - just fucking around for now */
+        border-style: solid;
+        border-color: black;
+        border-width: 3px;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px;
+    }
+
+    .new_item_edit_box {
+        background-color: burlywood; /* this can be changed - just fucking around for now */
+        border-style: solid;
+        border-color: black;
+        border-width: 3px;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px;
+    }
+    .new_item_edit_box {
+        background-color: burlywood; /* this can be changed - just fucking around for now */
+        border-style: solid;
+        border-color: black;
+        border-width: 3px;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px;
+    }
+
+    .dropdown_box {
+        align-content: flex-start;
+    }
+
+
+</style>
 <body>
 <h3>Current User: {{user.first_name}} {{user.last_name}} - username {{user.username}}</h3>
 <p>You can edit items below - be advised, they do not save you click save.</p>
+<p>Sort by <a href="#">Name</a> <a href="#">Description</a> <a href="#">Origin</a> <a href="#">Destination</a> <a href="#">Customer</a></p>
 {% for item in items %}
-<div style="border-width: 3px; border-color: black;" class="item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}}" id="{{item.id}}">
+<div class="item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}}" id="{{item.id}}">
 
     <!--Each item input box gets a form to submit that ties to an individual item in the db -->
-    <form action="#" >
+    <form action="/edit_item" method="post">
+        <input type="hidden" name="id" value="{{ item.id }}">
+        <p>Description:  <textarea name="description">{{item.description}}</textarea>  Database Short Name:  <input name="name" value="{{item.name}}"></p>
         <h3>Checked in by:</h3>
+        <div class="dropdown_box">
         <select id="checked_in_by" name="checked_in_by">
         {% for person in people %}
         <option value="{{person.username}}" {% if person.username ==  item.checked_in_by %} selected {% endif %} >{{person.first_name}} {{person.last_name}}</option>
@@ -25,15 +66,68 @@
             <option value="{{customer.username}}"{% if customer.username ==  item.customer %} selected {% endif %}>{{customer.first_name}} {{customer.last_name}}</option>
             {% endfor %}}
         </select>
-
+        </div>
         <div align="left">
             <p>Weight: <input id="weight" type="number" name="weight" value={{ item.weight }} > lbs</p>
-            <p>Volume: </p>
         </div>
+        <p> From:
+        <select id="origin" name="origin">
+        {% for place in places %}
+        <option value="{{place.airport_code}}" {% if place.airport_code ==  item.orgin %} selected {% endif %} >{{place.name}} {{place.airport_code}}</option>
+            {% endfor %}} </select> ->
+        <select id="destination" name="destination">
+        {% for place in places %}
+        <option value="{{place.airport_code}}" {% if place.airport_code ==  item.destination %} selected {% endif %} >{{place.name}} {{place.airport_code}}</option>
+            {% endfor %}} </select>
+
+        </p>
+
+        <input type="submit">
 
     </form>
 
 </div>
 {% endfor %}
+<div class="new_item_edit_box">
+    <h3>Make new item:</h3>
+    <form action="/new_item" method="POST">
+        <p>Description:  <textarea name="description">Type a short description</textarea>  Database Short Name:  <input name="name" value="Type something here!"></p>
+        <h3>Checked in by:</h3>
+        <div class="dropdown_box">
+        <select id="checked_in_by" name="checked_in_by">
+        {% for person in people %}
+        <option value="{{person.username}}" {% if person.username ==  user.username %} selected {% endif %} >{{person.first_name}} {{person.last_name}}</option>
+        {% endfor %}}
+        </select>
+
+        <h3>Customer:</h3>
+        <select id="customer" name="customer">
+            {% for customer in people %}
+            <option value="{{customer.username}}">{{customer.first_name}} {{customer.last_name}}</option>
+            {% endfor %}}
+        </select>
+        </div>
+        <div align="left">
+            <p>Weight: <input id="weight" type="number" name="weight" value=1> lbs</p>
+            <p>Price $<input id="price" type="number" name="price" value=10></p>
+        </div>
+        <p> From:
+        <select id="origin" name="origin">
+        {% for place in places %}
+        <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
+            {% endfor %}} </select> ->
+        <select id="destination" name="destination">
+        {% for place in places %}
+        <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
+            {% endfor %}} </select>
+
+        </p>
+
+        <input type="submit">
+
+    </form>
+</div>
+<br>
+<a href="/control_panel">Control Panel</a>
 </body>
 </html>

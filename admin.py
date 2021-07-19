@@ -199,8 +199,8 @@ class Database:
                 item.weight = row[3]
                 item.volume = row[4]
                 item.price = row[5]
-                item.paid = bool(row[6])
-                item.description = row[7]
+                item.paid = row[7]
+                item.description = row[6]
                 item.origin = row[8]
                 item.destination = row[9]
                 item.id = row[10] 
@@ -312,8 +312,8 @@ class Database:
             weight,
             volume,
             price,
-            paid,
             description,
+            paid,
             origin,
             destination,
             id)
@@ -336,8 +336,8 @@ class Database:
                         item.weight,
                         item.volume,
                         item.price,
+                        item.description,
                         item.paid,
-                        item.destination,
                         item.origin,
                         item.destination,
                         item.id
@@ -408,3 +408,6 @@ class Database:
         else:
             return max([self.items[i].id for i in self.items])
 
+    def return_item_by_id(self, id) -> Item:
+        # take an id number and return an item from it
+        return self.items[id]

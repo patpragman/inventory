@@ -185,8 +185,9 @@ def amend_personal_data() -> str:
 
         new_password = request.form["password"]
         verify_pass = request.form["verify_pass"]
+        # check the password match on the server - otherwise back around you go!
         if new_password == verify_pass:
-            print("Password changed!")  # debug
+            # print("Password changed!")  # debug
             person.change_password(new_password)
             person.update_log("Password changed", by=person.username)
         else:
@@ -202,7 +203,7 @@ def amend_personal_data() -> str:
         person.notes = request.form["notes"]
         person.log = person.update_log("Updated personal details", by=person.username)
         # now we have to change the underlying object in the db
-        db.people.pop(old_name)
+        db.people.pop(old_name)  # get rid of the old name in the database using the old username in case its changed
         db.people[person.username] = person
         session["username"] = person.username
         session["password"] = person.password
@@ -319,9 +320,11 @@ def new_customer() -> str:
             customer.is_employee = False
             customer.is_active = True
             if customer.username in db.people:
-                customer.username = customer.username + "copy" #if there's a duplicate append copy to the name
+                customer.username = customer.username + "copy" # if there's a duplicate append copy to the name
 
             db.people[customer.username] = customer
+            return redirect("edit_customer")
+
         elif request.method == "GET":
             # if it's a get request, use the render template for making a new customer
             return render_template("new_customer.html", message="Please enter new customer information.")

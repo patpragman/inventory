@@ -269,6 +269,35 @@ def new_user() -> str:
         return render_template("new_user.html", message="Enter your information please!")
 
 
+@app.route("/edit_customer", methods=["POST", "GET"])
+def edit_customer() -> str:
+    # first get the database of all the stuff we're working with
+    global db
+    try:
+        # everything is buried inside some error handling
+        # then we evaluate if it's a "POST" or a "GET" request
+        if request.method == "POST":
+            # first retrieve the person out of the db using the username in the form
+            username = request.form["name"]
+            person = db.people[username]
+            # now update all the data
+            person.first_name = request.form["first_name"]
+            person.last_name = request.form["last_name"]
+            person.notes = request.form["notes"]
+            person.phone = request.form["phone"]
+            person.email = request.form["email"]
+            person.address = request.form["address"]
+            # after you've changed eveerything, redirect to the "edit customer page" again
+            return redirect("/edit_customer")
+        elif request.method == "GET":
+            return "edit_customer doesn't support GET yet"
+        else:
+            raise InvalidRequest("edit_customer can only understand GET and POST requests.")
+    except Exception as err:
+        print(err)
+        return str(err)
+
+
 
 @app.route("/new_customer", methods=["GET", "POST"])
 def new_customer() -> str:

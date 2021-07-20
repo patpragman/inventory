@@ -50,6 +50,9 @@ def main() -> str:
             # however, if there is session cookie and we've made it this far, let's try to login
             # first check that the username from the session cookie is in the database
             if username in db.people:
+                # first we should raise an error if the user isn't an employee
+                if not db.people[username].is_employee:
+                    raise UnknownUserError(username)
                 # if it actually is in the database, check the password
                 if db.people[username].verify_password(password):
                     # if the password works then go ahead and log in and redirect to the control panel
@@ -243,6 +246,7 @@ def new_user() -> str:
             db.people[person.username] = person
             session["username"] = person.username
             session["password"] = person.password
+            person.is_employee = True
 
             if new_password == verify_pass:
                 # print("Password changed!")  # debug
@@ -265,6 +269,35 @@ def new_user() -> str:
         return render_template("new_user.html", message="Enter your information please!")
 
 
+
+@app.route("/new_customer", methods=["GET", "POST"])
+def new_customer() -> str:
+    global db
+    # first we'll wrap the whole thing inside some exception handling
+    try:
+        if request.method == "POST":
+            customer = Person()
+            customer.username = str(request.form["first_name"][0]) + str(request.form["last_name"])
+            customer.first_name = request.form["first_name"]
+            customer.last_name = request.form["last_name"]
+            customer.notes = request.form["notes"]
+            customer.phone = request.form["phone"]
+            customer.address = request.form["address"]
+            customer.email = request.form["email"]
+            customer.is_employee = False
+            customer.is_active = True
+            if customer.username in db.people:
+                customer.username = customer.username + "copy" #if there's a duplicate append copy to the name
+
+            db.people[customer.username] = customer
+        elif request.method == "GET":
+            # if it's a get request, use the render template for making a new customer
+            return render_template("new_customer.html", message="Please enter new customer information.")
+        else:
+            raise InvalidRequest("/create_new_customer can only accept a get or a post.")
+    except Exception as err:
+        print(err)
+        return str(err)
 
 @app.route("/edit_personal_user")
 def edit_personal_user() -> str:

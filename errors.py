@@ -48,3 +48,11 @@ class NotLoggedInError(Exception):
     def __str__(self) -> str:
 
         return "Trying to access a page while not logged in. " + self.note
+
+class InvalidRequest(Exception):
+
+    def __init__(self, note):
+        self.note = note
+
+    def __str__(self):
+        return self.note

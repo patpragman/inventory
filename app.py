@@ -290,7 +290,10 @@ def edit_customer() -> str:
             # after you've changed eveerything, redirect to the "edit customer page" again
             return redirect("/edit_customer")
         elif request.method == "GET":
-            return "edit_customer doesn't support GET yet"
+            # return the edit customer template
+            return render_template("edit_customer.html",
+                                   user=db.people[session["username"]],
+                                   people=[db.people[person] for person in db.people])
         else:
             raise InvalidRequest("edit_customer can only understand GET and POST requests.")
     except Exception as err:

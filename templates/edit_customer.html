@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Management</title>
+</head>
+<style>
+    .person_edit_box {
+        background-color: aquamarine; /* this can be changed - just fucking around for now */
+        border-style: solid;
+        border-color: black;
+        border-width: 3px;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px;
+    }
+
+
+</style>
+<body>
+<h3>Welcome, {{user.username}}.</h3>
+<p>You can edit customer data below - be advised, they do not save unless you click save.</p>
+<p>Sort by <a href="#">Username</a> <a href="#">First Name</a> <a href="#">Last Name</a></p>
+
+{% for person in people %}
+<div class="person_edit_box {{person.username}} {{person.first_name}} {{person.last_name}}" id="{{person.username}}">
+
+    <!--Each person input box gets a form to submit that ties to an individual in the db -->
+    <form action="/edit_customer" method="post">
+        <input type="hidden" name="name" value="{{person.username}}">
+        <p>First name:  <input value="{{person.first_name}}" name="first_name"></p>
+        <p>Last name:  <input value="{{person.last_name}}" name="last_name"></p>
+        <p>Phone Number:  <input value="{{person.phone}}" name="phone"></p>
+        <p>Email:  <input value="{{person.email}}" name="email"></p>
+        <textarea name="address">{{person.address}}</textarea>
+        <textarea name="notes">{{person.notes}}</textarea>
+        <input type="submit">
+    </form>
+</div>
+{% endfor %}
+
+
+<br>
+<a href="/control_panel">Control Panel</a>
+</body>
+</html>

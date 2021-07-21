@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Place Management</title>
+</head>
+<style>
+    .place_edit_box {
+        background-color: cornsilk; /* this can be changed - just fucking around for now */
+        border-style: solid;
+        border-color: black;
+        border-width: 3px;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px;
+    }
+    .new_place_edit_box {
+        background-color: chartreuse; /* this can be changed - just fucking around for now */
+        border-style: solid;
+        border-color: black;
+        border-width: 3px;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px;
+    }
+
+
+</style>
+<body>
+<h3>Welcome, {{user.username}}.</h3>
+<p>You can edit customer data below - be advised, they do not save unless you click save.</p>
+<p>Sort by <a href="#">Airport Code</a> <a href="#">Name</a></p>
+
+{% for place in places %}
+<div class="place_edit_box {{place.name}} {{place.airport_code}}}}" id="{{place.name}}">
+
+    <h3>Current Placename {{place.name}}</h3>
+    <form action="/edit_place" method="post">
+        <input type="hidden" name="name" value="{{place.name}}">
+        <p>Name:  <input value="{{place.name}}" name="new_name"></p>
+        <p>Airport Code:  <input value="{{place.airport_code}}" name="airport_code"></p>
+        <textarea name="description">{{place.description}}</textarea>
+        <input type="submit">
+    </form>
+</div>
+{% endfor %}
+
+<div class="new_place_edit_box">
+
+    <h3>Create a new place:</h3>
+    <form action="/new_place" method="POST">
+        <p>Name:  <input name="name"></p>
+        <p>Airport Code:  <input name="airport_code"></p>
+        <textarea name="description"></textarea>
+        <input type="submit">
+    </form>
+</div>
+
+<br>
+<a href="/control_panel">Control Panel</a>
+</body>
+</html>

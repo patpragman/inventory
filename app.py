@@ -302,7 +302,6 @@ def edit_customer() -> str:
         return str(err)
 
 
-
 @app.route("/new_customer", methods=["GET", "POST"])
 def new_customer() -> str:
     global db
@@ -401,6 +400,60 @@ def logout() -> None:
     session.clear()  # clear the session history then go back to the main page
     return redirect("/")
 
+
+@app.route("/new_place", methods=["GET", "POST"])
+def new_place() -> str:
+    # we'll access the global db
+    global db
+    try:
+        if request.method == "GET":
+            return redirect("/edit_place")
+        elif request.method == "POST":
+            place = Place()
+            place.name = request.form["name"]
+            place.airport_code = request.form["airport_code"]
+            place.description = request.form["description"]
+            # place.price = request.form["price"]  # when implemented
+            db.places[request.form["name"]] = place
+            return redirect("/edit_place")
+        else:
+            raise InvalidRequest("Only supported methods are GET and POST.")
+    except Exception as err:
+        print(err)
+        return str(err)
+
+
+@app.route("/edit_place", methods=["GET", "POST"])
+def edit_places() -> str:
+    # like all the other methods we'll get the global database, then
+    # wrap the handling into some try and except statements to handle the errors
+    global db
+    try:
+        if request.method == "GET":
+            # all get requests get the "edit place" template
+            return render_template("edit_places.html",
+                                   message="",
+                                   user=session["username"],
+                                   places=[db.places[place] for place in db.places])
+        elif request.method == "POST":
+            # get the referenced place
+            place = db.places[request.form["name"]]
+            old_name = place.name  # copy the old name so we can pop it out of the dictionary later
+            place.name = request.form["new_name"]  # get the new name
+            place.airport_code = request.form["airport_code"]
+            place.description = request.form["description"]
+            db.places.pop(old_name) # pop the old name out
+            db.places[place.name] = place
+
+            return render_template("edit_places.html",
+                                   user=session["username"],
+                                   message="Successfully edited place.",
+                                   places=[db.places[place] for place in db.places])
+        else:
+            raise InvalidRequest("Only GET and POST are valid request types.")
+    except Exception as err:
+        print(err)
+        return str(err)
 
 # we'll use SSL to hide submitted passwords
 if __name__ == '__main__':

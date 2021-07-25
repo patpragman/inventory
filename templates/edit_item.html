@@ -41,12 +41,15 @@
 
 
 </style>
+<script type=text/javascript src="{{
+  url_for('static', filename='js/qrcode.js') }}"></script>
 <body>
 <h3>Current User: {{user.first_name}} {{user.last_name}} - username {{user.username}}</h3>
 <p>You can edit items below - be advised, they do not save you click save.</p>
 <p>Sort by <a href="#">Name</a> <a href="#">Description</a> <a href="#">Origin</a> <a href="#">Destination</a> <a href="#">Customer</a></p>
 {% for item in items %}
-<div class="item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}}" id="{{item.id}}">
+<div class="item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}}" id="{{item.id}}"  style="float:left" >
+    <div id="qrcode"></div>
 
     <!--Each item input box gets a form to submit that ties to an individual item in the db -->
     <form action="/edit_item" method="post">
@@ -79,8 +82,14 @@
         {% for place in places %}
         <option value="{{place.airport_code}}" {% if place.airport_code ==  item.destination %} selected {% endif %} >{{place.name}} {{place.airport_code}}</option>
             {% endfor %}} </select>
-
         </p>
+        <a href="{{item.cart_load_url}}">Add item to current cart</a>
+
+        <!--pulled this QR code generator from here https://davidshimjs.github.io/qrcodejs/-->
+
+        <script type="text/javascript">
+        new QRCode(document.getElementById("qrcode"), "http://jindo.dev.naver.com/collie");
+        </script>
 
         <input type="submit">
 
@@ -88,6 +97,7 @@
 
 </div>
 {% endfor %}
+
 <div class="new_item_edit_box">
     <h3>Make new item:</h3>
     <form action="/new_item" method="POST">

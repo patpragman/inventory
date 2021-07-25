@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cart!</title>
+</head>
+<body>
+<h3>Welcome to the cart manager!</h3>
+<p>{{user.username}} logged in.</p>
+{% for item in cart %}
+    <div class="cart_item">
+        <form action="/cart/2/{{item.id}}" method="GET">
+            <p>{{item.mame}}</p>
+            <p>{{item.description}}</p>
+            <p>{{item.origin}} -> {{item.destination}}</p>
+            <input type="submit" value="Remove from cart">
+        </form>
+    </div>
+{% endfor %}
+<br><br>
+<a href="/ship_all">Ship All Items</a>
+<br><br>
+<a href="/remove_all">Remove All Items from Cart</a>
+<br><br>
+<a href="/control_panel">Control Panel</a>
+
+</body>
+</html>

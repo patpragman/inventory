@@ -12,6 +12,8 @@ app.secret_key = os.urandom(50)  # set the secret key on startup
 
 # load the database into memory
 db = Database()
+loading_cart = []
+
 # when the process dies, save everything for next time
 atexit.register(db.save_people)  # save people
 atexit.register(db.save_items)  # save items
@@ -23,9 +25,6 @@ SESSION_COOKIE_NAME = "login_info"  # I'm spit balling here - but this is the na
 SESSION_TYPE = "filesystem"
 app.config.from_object(__name__)  # I also have no idea what this is doing
 Session(app)  # this starts the session manager
-
-# carts are stored in this variable this should be persistent between sessions but doesn't need to be stored in the db
-carts = [Cart]
 
 @app.route("/login", methods=["POST", "GET"])
 @app.route("/", methods=["POST", "GET"])
@@ -119,6 +118,113 @@ def control_panel():
         print(err)
         return redirect("/")
 
+@app.route('/remove_all', methods=["GET"])
+def remove_all() -> str:
+    global db
+    global loading_cart
+
+    loading_cart.clear()
+
+    return redirect("/cart")
+
+@app.route("/ship_all", methods=["GET"])
+def ship_all() -> str:
+    global db
+    global loading_cart
+
+
+    # iterate through the list and take everything out of the dictionary
+    for item in loading_cart:
+        id = item.id
+        db.items.pop(id)
+
+    # now empty the whole db
+    loading_cart.clear()
+
+    return redirect("/control_panel")
+
+
+# stolen and adapted from stack exchange
+# https://stackoverflow.com/questions/14032066/can-flask-have-optional-url-parameters
+# I think this is the most reasonable
+@app.route('/cart')
+@app.route('/cart/<status>/<item_id>', methods=["GET", "POST"])
+def cart(status=0, item_id=None) -> str:
+    # grab the db copy
+    # also load up the cart
+    global db
+    global loading_cart
+
+    """
+    debug
+    print("status:  ", status)  # debug
+    print("item_id:  ", item_id)  # debug
+    """
+    try:
+        # check to see if logged in - otherwise panic!
+        try:
+            person = session["username"]
+        except:
+            raise NotLoggedInError()
+
+        # this method is "GET" only
+        if request.method == "POST":
+            raise InvalidRequest('Only "GET" is acceptable with this method.')
+        elif request.method == "GET":
+            # now that we've made it this far into the method, let's change the strings coming from
+            # the browser into integers so they can interface comfortably with the database dictionary
+            # you can do it by usings strings or some sort of id, but it's easier to just mash them into
+            # integers
+            status = int(status)
+
+            if item_id is not None:
+                # we get an error if the item_id is the default - this is fine but we want
+                # just only want type-cast this to an int in the event that there's actually
+                # an item_id attached to this
+                item_id = int(item_id)
+
+            # now we need to check to see if it is a load or not
+            if status == 0:
+                # if nothing was done return the cart page
+                # print("made it to here - status 0")  # debug
+                return render_template("carts.html",
+                                       cart=loading_cart,
+                                       user=db.people[session["username"]],
+                                       people=[db.people[person] for person in db.people],
+                                       places=[db.places[place] for place in db.places],
+                                       items=[db.items[item] for item in db.items])
+            elif status == 1:
+                # this is a load GET request
+                # handle loading stuff to the cart here
+                # all the QR codes have this particular request status
+                for item in db.items:
+                    working_item = db.items[item]
+                    if working_item.id == item_id:
+                        loading_cart.append(working_item)
+                        return redirect("/edit_item")
+
+                # now redirect to the cart again
+                raise ItemNotFound()
+
+            elif status == 2:
+                # handle a deleting stuff out of the cart here
+                for item in db.items:
+                    working_item = db.items[item]
+
+                    if working_item.id == item_id:
+                        # if this matches, pop it off the list and redirect
+                        loading_cart.remove(working_item)
+                        return redirect("/cart")
+
+                raise ItemNotFound()
+            else:
+                raise InvalidRequest("Carts meed the variable 0,1, or 2,  Those values must be interpreted by Flask as strings, and type casting might have broken.")
+
+    except Exception as err:
+        print(err)
+        return redirect("/cart")
+
+
 
 
 @app.route("/edit_item", methods=["POST", "GET"])
@@ -135,7 +241,7 @@ def edit_item() -> str:
             return render_template("edit_item.html",
                                    user=db.people[session["username"]],
                                    people=[db.people[person] for person in db.people],
-                                   items=[db.items[item] for item in db.items],
+                                   items=[db.items[item] for item in db.items if db.items[item] not in loading_cart],
                                    places=[db.places[place] for place in db.places])
         elif request.method == "POST":
             # if it's posting data, get the particular data it's posting and adjust the adjust the
@@ -148,6 +254,7 @@ def edit_item() -> str:
             item.checked_in_by = request.form["checked_in_by"]
             item.customer = request.form["customer"]
             item.weight = request.form["weight"]
+
             return redirect("/edit_item")
 
 
@@ -203,8 +310,9 @@ def amend_personal_data() -> str:
         person.notes = request.form["notes"]
         person.log = person.update_log("Updated personal details", by=person.username)
         # now we have to change the underlying object in the db
-        db.people.pop(old_name)  # get rid of the old name in the database using the old username in case its changed
+        del db.people[old_name]  # get rid of the old name in the database using the old username in case its changed
         db.people[person.username] = person
+        # now change the session cookies as appropriate
         session["username"] = person.username
         session["password"] = person.password
         # now go back to the control panel
@@ -289,6 +397,8 @@ def edit_customer() -> str:
             person.email = request.form["email"]
             person.address = request.form["address"]
             # after you've changed eveerything, redirect to the "edit customer page" again
+            for person in db:
+                print(person.username)  # debug
             return redirect("/edit_customer")
         elif request.method == "GET":
             # return the edit customer template
@@ -350,12 +460,7 @@ def new_item() -> str:
     global db
     # if you're getting a page from the server - render the appropriate template
     if request.method == "GET":
-        places_list = []
-        people_list = []
-        for place in db.places:
-            places_list.append(db.places[place])
-        for person in db.people:
-            people_list.append(db.people[person])
+
 
         return render_template("/new_item.html",
                                    user=db.people[session["username"]],
@@ -382,6 +487,12 @@ def new_item() -> str:
             item.origin = request.form["origin"]
             item.destination = request.form["destination"]
             db.items[item.id] = item
+
+            item.cart_load_url = item.make_cart_load_url()
+            item.cart_unload_url = item.make_cart_remove_url()
+            # debug
+            print(item.cart_unload_url)
+            print(item.cart_unload_url)
 
             return redirect("/edit_item")
 
@@ -437,13 +548,15 @@ def edit_places() -> str:
                                    places=[db.places[place] for place in db.places])
         elif request.method == "POST":
             # get the referenced place
-            place = db.places[request.form["name"]]
+            new_name = request.form["name"]
+            place = db.places[new_name]
             old_name = place.name  # copy the old name so we can pop it out of the dictionary later
             place.name = request.form["new_name"]  # get the new name
             place.airport_code = request.form["airport_code"]
             place.description = request.form["description"]
-            db.places.pop(old_name) # pop the old name out
             db.places[place.name] = place
+            # finally, delete the old key-value pair
+            del db.places[old_name]
 
             return render_template("edit_places.html",
                                    user=session["username"],

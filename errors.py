@@ -41,7 +41,7 @@ class InvalidPassword(Exception):
 
 class NotLoggedInError(Exception):
 
-    def __init__(self, note) -> None:
+    def __init__(self, note="") -> None:
 
         self.note = note
 
@@ -51,8 +51,17 @@ class NotLoggedInError(Exception):
 
 class InvalidRequest(Exception):
 
-    def __init__(self, note):
+    def __init__(self, note="Only GET or POST are acceptable request types."):
         self.note = note
+
+    def __str__(self):
+        return self.note
+
+class ItemNotFound(Exception):
+
+    def __init(self):
+
+        self.note = "Item not found in the database."
 
     def __str__(self):
         return self.note

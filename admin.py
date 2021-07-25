@@ -1,6 +1,7 @@
 import sqlite3
 from passlib.context import  CryptContext
 import datetime
+import config
 
 
 class Person:
@@ -91,6 +92,22 @@ class Item:
         self.description = description
         self.origin = origin
         self.destination = destination
+        self.cart_load_url = ""
+        self.cart_unload_url = ""
+
+    def make_cart_load_url(self) -> str:
+        # takes a cart item and produces a cart load url
+        # recall that a status of
+        base_url = config.Config.local_url
+
+        return base_url + "cart/" "1" + "/" + str(self.id)
+
+    def make_cart_remove_url(self) -> str:
+        # takes a cart item and produces a cart load url
+        # recall that a status of
+        base_url = config.Config.local_url
+
+        return base_url + "cart/" + "2" + "/" + str(self.id)
 
 
 class Place:
@@ -209,6 +226,10 @@ class Database:
                 when I refactor things a bit later this will move up in both the DB and in the mapping code
                 but for now this is fine."""
 
+                # also, we need to generate a load and a remove url from the code
+                item.cart_load_url = item.make_cart_load_url()
+                item.cart_unload_url = item.make_cart_remove_url()
+
                 self.items[item.id] = item
 
             conn.close()  # close the database
@@ -245,7 +266,9 @@ class Database:
             print(e)
 
     def save_people(self) -> bool:
-        # first let's put all the people into the database
+        # first we'll delete all the people out of the db so we don't end up with copies
+        self.clear_rows_of("person")
+        # next let's put all the people into the database
         # first let's write the SQL to update the db
         sql_query = """
         insert or replace into person (
@@ -302,6 +325,8 @@ class Database:
         return result
 
     def save_items(self) -> bool:
+        # first let's clear out all the items that were previously in the SQL db
+        self.clear_rows_of("item")
         # now we'll put all the items bak into the db
         # first let's write the SQL to update the db
         sql_query = """
@@ -357,6 +382,8 @@ class Database:
         return result
 
     def save_places(self) -> bool:
+        # first part is to clear the database of all the old places
+        self.clear_rows_of("place")
         # now we'll save the places
         # first let's write the SQL to update the db
         sql_query = """
@@ -411,3 +438,20 @@ class Database:
     def return_item_by_id(self, id) -> Item:
         # take an id number and return an item from it
         return self.items[id]
+
+    def clear_rows_of(self,table) -> None:
+        try:
+            # this will clear all the stuff from whatever table you specify
+            statement = """DELETE from """ + str(table) + ";"
+            conn = sqlite3.connect(Database.location)
+            cur = conn.cursor()
+            cur.execute(statement)
+            conn.commit()
+        except Exception as err:
+            print("Error processing SQL in clear_rows_of function")
+            print(err)
+
+
+
+
+

@@ -94,6 +94,7 @@ class Item:
         self.destination = destination
         self.cart_load_url = ""
         self.cart_unload_url = ""
+        self.qr_code_url = ""
 
     def make_cart_load_url(self) -> str:
         # takes a cart item and produces a cart load url
@@ -108,6 +109,13 @@ class Item:
         base_url = config.Config.local_url
 
         return base_url + "cart/" + "2" + "/" + str(self.id)
+
+    def make_qr_redirect_url(self) -> str:
+        # takes a cart item and produces a cart load url
+        # recall that a status of
+        base_url = config.Config.local_url
+
+        return base_url + "cart/" + "3" + "/" + str(self.id)
 
 
 class Place:
@@ -226,9 +234,10 @@ class Database:
                 when I refactor things a bit later this will move up in both the DB and in the mapping code
                 but for now this is fine."""
 
-                # also, we need to generate a load and a remove url from the code
+                # also, we need to generate the appropriate URLs
                 item.cart_load_url = item.make_cart_load_url()
                 item.cart_unload_url = item.make_cart_remove_url()
+                item.qr_code_url = item.make_qr_redirect_url()
 
                 self.items[item.id] = item
 

@@ -41,15 +41,12 @@
 
 
 </style>
-<script type=text/javascript src="{{
-  url_for('static', filename='js/qrcode.js') }}"></script>
 <body>
 <h3>Current User: {{user.first_name}} {{user.last_name}} - username {{user.username}}</h3>
 <p>You can edit items below - be advised, they do not save you click save.</p>
 <p>Sort by <a href="#">Name</a> <a href="#">Description</a> <a href="#">Origin</a> <a href="#">Destination</a> <a href="#">Customer</a></p>
 {% for item in items %}
-<div class="item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}}" id="{{item.id}}"  style="float:left" >
-    <div id="qrcode"></div>
+<div class="item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}}" id="{{item.id}}"  style="float: inside" >
 
     <!--Each item input box gets a form to submit that ties to an individual item in the db -->
     <form action="/edit_item" method="post">
@@ -84,12 +81,7 @@
             {% endfor %}} </select>
         </p>
         <a href="{{item.cart_load_url}}">Add item to current cart</a>
-
-        <!--pulled this QR code generator from here https://davidshimjs.github.io/qrcodejs/-->
-
-        <script type="text/javascript">
-        new QRCode(document.getElementById("qrcode"), "http://jindo.dev.naver.com/collie");
-        </script>
+        <a href="{{item.qr_code_url}}">Generate Label</a>
 
         <input type="submit">
 
@@ -98,7 +90,7 @@
 </div>
 {% endfor %}
 
-<div class="new_item_edit_box">
+<div class="new_item_edit_box" style="float: outside">
     <h3>Make new item:</h3>
     <form action="/new_item" method="POST">
         <p>Description:  <textarea name="description">Type a short description</textarea>  Database Short Name:  <input name="name" value="Type something here!"></p>

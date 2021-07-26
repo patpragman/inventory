@@ -217,12 +217,28 @@ def cart(status=0, item_id=None) -> str:
                         return redirect("/cart")
 
                 raise ItemNotFound()
+            elif status == 3:
+                # here's where we're going to transfer you to the label gen template
+                return render_template("label.html",
+                                       item=db.items[item_id],
+                                       user=db.people[session["username"]])
             else:
-                raise InvalidRequest("Carts meed the variable 0,1, or 2,  Those values must be interpreted by Flask as strings, and type casting might have broken.")
+                raise InvalidRequest("Carts meed the variable 0, 1, 2, or 3.  Those values must be interpreted by Flask as strings, and type casting might have broken.")
 
     except Exception as err:
-        print(err)
-        return redirect("/cart")
+        if isinstance(err,NotLoggedInError):
+            # if you're not logged in go back to the redirect page
+            return redirect("/")
+        elif isinstance(err, InvalidRequest):
+            # if it's an invalid request return the error
+            return str(err)
+        elif isinstance(err, ItemNotFound):
+            # if it's a missing item shoot that error out to the browser
+            return str(err)
+        else:
+            # if it's something else, return the error to the browser
+            print(err)
+            return str(err)
 
 
 
@@ -490,9 +506,7 @@ def new_item() -> str:
 
             item.cart_load_url = item.make_cart_load_url()
             item.cart_unload_url = item.make_cart_remove_url()
-            # debug
-            print(item.cart_unload_url)
-            print(item.cart_unload_url)
+            item.qr_code_url = item.make_qr_redirect_url()
 
             return redirect("/edit_item")
 

@@ -1,5 +1,5 @@
 import sqlite3
-from passlib.context import  CryptContext
+from passlib.context import CryptContext
 import datetime
 import config
 
@@ -101,7 +101,7 @@ class Item:
         # recall that a status of
         base_url = config.Config.local_url
 
-        return base_url + "cart/" "1" + "/" + str(self.id)
+        return "cart/" "1" + "/" + str(self.id)
 
     def make_cart_remove_url(self) -> str:
         # takes a cart item and produces a cart load url
@@ -115,7 +115,7 @@ class Item:
         # recall that a status of
         base_url = config.Config.local_url
 
-        return base_url + "cart/" + "3" + "/" + str(self.id)
+        return "cart/" + "3" + "/" + str(self.id)
 
 
 class Place:
@@ -148,7 +148,6 @@ class Cart:
             self.description = "Generic Cart"  # this should be editable by the user
             self.items = [Item]  # this should be a list of items
             self.creator: Person = None
-
 
 
 class Database:
@@ -237,7 +236,7 @@ class Database:
                 # also, we need to generate the appropriate URLs
                 item.cart_load_url = item.make_cart_load_url()
                 item.cart_unload_url = item.make_cart_remove_url()
-                item.qr_code_url = item.make_qr_redirect_url()
+                item.qr_code_url = config.Config.local_url + item.make_qr_redirect_url()
 
                 self.items[item.id] = item
 

@@ -1,7 +1,7 @@
 import atexit
 import datetime
 from errors import *
-
+import config  # config file with stuff to run the app
 from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
 from admin import *
@@ -221,7 +221,8 @@ def cart(status=0, item_id=None) -> str:
                 # here's where we're going to transfer you to the label gen template
                 return render_template("label.html",
                                        item=db.items[item_id],
-                                       user=db.people[session["username"]])
+                                       user=db.people[session["username"]],
+                                       address="https://" + config.Config.global_addy + db.items[item_id].make_cart_load_url())
             else:
                 raise InvalidRequest("Carts meed the variable 0, 1, 2, or 3.  Those values must be interpreted by Flask as strings, and type casting might have broken.")
 
@@ -582,6 +583,11 @@ def edit_places() -> str:
         print(err)
         return str(err)
 
+
 # we'll use SSL to hide submitted passwords
 if __name__ == '__main__':
-    app.run(ssl_context="adhoc")
+    app.run(ssl_context=config.Config.ssl_context,
+            host=config.Config.host)
+
+
+

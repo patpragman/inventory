@@ -24,20 +24,37 @@ class Person:
                  is_employee: bool = False,
                  is_admin: bool = False,
                  notes: str = "Empty note.",
-                 is_active: bool = True) -> None:
-        self.first_name = first_name
-        self.last_name = last_name
-        self.address = address
-        self.phone = phone
-        self.email = email
-        self.username = username
-        self.password = Person.pwd_context.hash(password)
-        self.is_employee = is_employee
-        self.is_admin = is_admin
-        self.last_logon = None
-        self.notes = notes
-        self.is_active = is_active
-        self.log = "Log: \n"
+                 is_active: bool = True,
+                 row: list = None) -> None:
+
+        if row is not None:
+            self.first_name = row[0]
+            self.last_name = row[1]
+            self.address = row[2]
+            self.phone = row[3]
+            self.email = row[4]
+            self.notes = row[5]
+            self.username = row[6]
+            self.password = row[7]
+            self.is_employee = bool(row[8])
+            self.is_admin = bool(row[9])
+            self.last_logon = row[10]
+            self.is_active = row[11]
+            self.log = row[12]
+        else:
+            self.first_name = first_name
+            self.last_name = last_name
+            self.address = address
+            self.phone = phone
+            self.email = email
+            self.username = username
+            self.password = Person.pwd_context.hash(password)
+            self.is_employee = is_employee
+            self.is_admin = is_admin
+            self.last_logon = None
+            self.notes = notes
+            self.is_active = is_active
+            self.log = "Log: \n"
 
     def verify_password(self, password: str) -> bool:
         result = Person.pwd_context.verify(password, self.password)
@@ -164,21 +181,7 @@ class Database:
             person_query_row = query_database(person_query, Database.location)
             for row in person_query_row:
                 # Iterate through all the rows, make a new node with the lat_lons
-                person = Person()
-                person.first_name = row[0]
-                person.last_name = row[1]
-                person.address = row[2]
-                person.phone = row[3]
-                person.email = row[4]
-                person.notes = row[5]
-                person.username = row[6]
-                person.password = row[7]
-                person.is_employee = bool(row[8])
-                person.is_admin = bool(row[9])
-                person.last_logon = row[10]
-                person.is_active = row[11]
-                person.log = row[12]
-
+                person = Person(row=row)
                 self.people[person.username] = person
 
             # now let's get all the items

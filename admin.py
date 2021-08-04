@@ -8,7 +8,7 @@ from sql import *
 class Person:
     # Person class, contains everything you need to know
     # Default Values to give an idea of the db structure
-    # password context is global to all "person classes"
+    # password context is shared by all "person classes"
     pwd_context = CryptContext(schemes=["pbkdf2_sha256"],
                                deprecated="auto",
                                )  # this is the password context for passlib
@@ -225,10 +225,9 @@ class Database:
             print("Error loading items.  See following error:")
             print(e)
 
-
     def save_people(self) -> bool:
         # first we'll delete all the people out of the db so we don't end up with copies
-        self.clear_rows_of("person")
+        clear_rows_of("person", Database.location)
         # next let's put all the people into the database
         # first let's write the SQL to update the db
         sql_query = """
@@ -287,7 +286,7 @@ class Database:
 
     def save_items(self) -> bool:
         # first let's clear out all the items that were previously in the SQL db
-        self.clear_rows_of("item")
+        clear_rows_of("item", Database.location)
         # now we'll put all the items bak into the db
         # first let's write the SQL to update the db
         sql_query = """
@@ -344,7 +343,7 @@ class Database:
 
     def save_places(self) -> bool:
         # first part is to clear the database of all the old places
-        self.clear_rows_of("place")
+        clear_rows_of("place", Database.location)
         # now we'll save the places
         # first let's write the SQL to update the db
         sql_query = """
@@ -399,17 +398,4 @@ class Database:
     def return_item_by_id(self, id_reference) -> Item:
         # take an id number and return an item from it
         return self.items[id_reference]
-
-    def clear_rows_of(self, table) -> None:
-        # this is a static method - apparently there's a better way to do this, not going to mess with it now
-        try:
-            # this will clear all the stuff from whatever table you specify
-            statement = """DELETE from """ + str(table) + ";"
-            conn = sqlite3.connect(Database.location)
-            cur = conn.cursor()
-            cur.execute(statement)
-            conn.commit()
-        except Exception as err:
-            print("Error processing SQL in clear_rows_of function")
-            print(err)
 

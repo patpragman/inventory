@@ -2,7 +2,7 @@ import sqlite3
 from passlib.context import CryptContext
 import datetime
 import config
-from sql import *
+from sql import query_database, clear_rows_of
 
 
 class Person:
@@ -10,8 +10,7 @@ class Person:
     # Default Values to give an idea of the db structure
     # password context is shared by all "person classes"
     pwd_context = CryptContext(schemes=["pbkdf2_sha256"],
-                               deprecated="auto",
-                               )  # this is the password context for passlib
+                               deprecated="auto")  # this is the password context for passlib
 
     def __init__(self,
                  first_name: str = "Guy",
@@ -178,9 +177,10 @@ class Database:
         # try to connect, then build persons, items, and places objects
         try:
             # let's connect to the database and get the person objects out of it
-            person_query_row = query_database(person_query, Database.location)
-            for row in person_query_row:
-                # Iterate through all the rows, make a new node with the lat_lons
+            person_query_rows = query_database(person_query, Database.location)
+            for row in person_query_rows:
+                # Iterate through all the rows creating a new person with every row
+                # the mapping from the database to the
                 person = Person(row=row)
                 self.people[person.username] = person
 
@@ -224,9 +224,14 @@ class Database:
 
                 self.places[place.name] = place
 
-        except sqlite3.Error as e:
-            print("Error loading items.  See following error:")
-            print(e)
+        except Exception as err:
+            if isinstance(err, sqlite3.Error):
+                # we can eventually put logs here
+                print("There was a database error.")
+                print(err)
+            else:
+                print("An unknown error occurred.")
+                print(err)
 
     def save_people(self) -> bool:
         # first we'll delete all the people out of the db so we don't end up with copies

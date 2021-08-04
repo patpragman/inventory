@@ -4,10 +4,11 @@ from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
 from admin import *
 from person import Person
-import os
+from item import Item
+import datetime
 
 app = Flask(__name__)
-app.secret_key = os.urandom(50)  # set the secret key on startup
+app.secret_key = config.Config.secret_key  # set the secret key on startup
 
 # load the database into memory
 db = Database()
@@ -71,8 +72,13 @@ def main() -> str:
                 return render_template("/login.html", message="Username not found.  Please try again.")
             elif isinstance(login_error, InvalidPassword):
                 return render_template("/login.html", message="Authentication failed.  Check password.")
+            elif isinstance(login_error, KeyError):
+                #  if you're not logged in, a key_error gets thrown
+                return render_template("/login.html", message="Not logged in.  Please log in.")
             else:
-                return render_template("/login.html", message="Please log in.")
+                print("There was some sort of error that we couldn't handle")
+                print(login_error, type(login_error))
+                return render_template("/login.html", message=str(login_error))
 
     elif request.method == "POST":
         # if you receive a post, make sure it's not blank, then reset then session variables

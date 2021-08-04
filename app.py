@@ -3,6 +3,7 @@ from errors import *
 from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
 from admin import *
+from person import Person
 import os
 
 app = Flask(__name__)
@@ -348,7 +349,7 @@ def amend_personal_data() -> str:
             return redirect("/login")
 
 
-@app.route("/new_user", methods=["post", "get"])
+@app.route("/new_user", methods=["POST", "GET"])
 def new_user() -> str:
     global db
     # again check to see if the user is logged in, otherwise send them back to login

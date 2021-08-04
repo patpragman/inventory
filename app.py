@@ -1,7 +1,5 @@
 import atexit
-import datetime
 from errors import *
-import config  # config file with stuff to run the app
 from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
 from admin import *
@@ -25,6 +23,7 @@ SESSION_COOKIE_NAME = "login_info"  # I'm spit balling here - but this is the na
 SESSION_TYPE = "filesystem"
 app.config.from_object(__name__)  # I also have no idea what this is doing
 Session(app)  # this starts the session manager
+
 
 @app.route("/login", methods=["POST", "GET"])
 @app.route("/", methods=["POST", "GET"])
@@ -106,7 +105,10 @@ def control_panel():
     try:
         try:
             person = db.people[session["username"]]
-        except:
+        except Exception as err:
+            # print the exception in case it's something else then raise a NotLoggedInError
+            # this could be bad if something else caused this to fail, but it starts the debug process at least
+            print(err)
             raise NotLoggedInError("There was an error while trying to get to the control panel page.")
 
         return render_template("/control_panel.html", person=person)
@@ -118,6 +120,7 @@ def control_panel():
         print(err)
         return redirect("/")
 
+
 @app.route('/remove_all', methods=["GET"])
 def remove_all() -> str:
     global db
@@ -127,14 +130,16 @@ def remove_all() -> str:
 
     return redirect("/cart")
 
+
 @app.route("/ship_all", methods=["GET"])
 def ship_all() -> str:
     global db
     global loading_cart
 
-
     # iterate through the list and take everything out of the dictionary
     for item in loading_cart:
+        # this shadows the name id here - and could be confusing
+        # I should fix this at some time
         id = item.id
         db.items.pop(id)
 
@@ -163,8 +168,9 @@ def cart(status=0, item_id=None) -> str:
     try:
         # check to see if logged in - otherwise panic!
         try:
-            person = session["username"]
-        except:
+            person = session["username"]  # I wonder if there's a better way to do this
+        except Exception as err:
+            print(err)
             raise NotLoggedInError()
 
         # this method is "GET" only
@@ -227,7 +233,7 @@ def cart(status=0, item_id=None) -> str:
                 raise InvalidRequest("Carts meed the variable 0, 1, 2, or 3.  Those values must be interpreted by Flask as strings, and type casting might have broken.")
 
     except Exception as err:
-        if isinstance(err,NotLoggedInError):
+        if isinstance(err, NotLoggedInError):
             # if you're not logged in go back to the redirect page
             return redirect("/")
         elif isinstance(err, InvalidRequest):
@@ -240,8 +246,6 @@ def cart(status=0, item_id=None) -> str:
             # if it's something else, return the error to the browser
             print(err)
             return str(err)
-
-
 
 
 @app.route("/edit_item", methods=["POST", "GET"])
@@ -273,8 +277,6 @@ def edit_item() -> str:
             item.weight = request.form["weight"]
 
             return redirect("/edit_item")
-
-
         else:
             # while we're implementing this, if anything breaks, panic and throw a flag
             raise Exception
@@ -282,6 +284,7 @@ def edit_item() -> str:
         print("Error!")
         print(err)
         return "There was an error! " + str(err)
+
 
 @app.route("/amend_personal_data", methods=["post"])
 def amend_personal_data() -> str:
@@ -343,6 +346,7 @@ def amend_personal_data() -> str:
                                    person=db.people[err.attempting_user])
         else:
             return redirect("/login")
+
 
 @app.route("/new_user", methods=["post", "get"])
 def new_user() -> str:
@@ -446,7 +450,7 @@ def new_customer() -> str:
             customer.is_employee = False
             customer.is_active = True
             if customer.username in db.people:
-                customer.username = customer.username + "copy" # if there's a duplicate append copy to the name
+                customer.username = customer.username + "copy"  # if there's a duplicate append copy to the name
 
             db.people[customer.username] = customer
             return redirect("edit_customer")
@@ -459,6 +463,7 @@ def new_customer() -> str:
     except Exception as err:
         print(err)
         return str(err)
+
 
 @app.route("/edit_personal_user")
 def edit_personal_user() -> str:
@@ -477,8 +482,6 @@ def new_item() -> str:
     global db
     # if you're getting a page from the server - render the appropriate template
     if request.method == "GET":
-
-
         return render_template("/new_item.html",
                                    user=db.people[session["username"]],
                                    people=[db.people[person] for person in db.people],
@@ -588,6 +591,4 @@ def edit_places() -> str:
 if __name__ == '__main__':
     app.run(ssl_context=config.Config.ssl_context,
             host=config.Config.host)
-
-
 

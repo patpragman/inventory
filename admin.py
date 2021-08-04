@@ -52,16 +52,15 @@ class Person:
         return result
 
     def change_password(self, new_password: str) -> None:
-            self.password = Person.pwd_context.hash(new_password)
-            self.update_log("password updated")
+        self.password = Person.pwd_context.hash(new_password)
+        self.update_log("password updated")
 
-    def update_log(self, event: str = "default log event", by: str="sofware") -> None:
+    def update_log(self, event: str = "default log event", by: str = "sofware") -> None:
         right_now = str(datetime.datetime.now())
-        self.log = event + " " + right_now+ " by " + by
+        self.log = event + " " + right_now + " by " + by
 
     def log_dump(self) -> None:
         print(self.log)
-        return self.log
 
     def log_purge(self, by="software") -> None:
         self.log = ""
@@ -99,7 +98,6 @@ class Item:
     def make_cart_load_url(self) -> str:
         # takes a cart item and produces a cart load url
         # recall that a status of
-        base_url = config.Config.local_url
 
         return "cart/" "1" + "/" + str(self.id)
 
@@ -113,8 +111,6 @@ class Item:
     def make_qr_redirect_url(self) -> str:
         # takes a cart item and produces a cart load url
         # recall that a status of
-        base_url = config.Config.local_url
-
         return "cart/" + "3" + "/" + str(self.id)
 
 
@@ -143,11 +139,8 @@ class Cart:
         the stuff going into the "cart" are members of the item
         class"""
 
-        def __init(self) -> None:
-
-            self.description = "Generic Cart"  # this should be editable by the user
-            self.items = [Item]  # this should be a list of items
-            self.creator: Person = None
+        self.description = "Generic Cart"  # this should be editable by the user
+        self.items = [Item]  # this should be a list of items
 
 
 class Database:
@@ -362,7 +355,7 @@ class Database:
             # and send them to the db
 
             for entry in self.items:
-                item = self.items[entry] # the key is the var entry
+                item = self.items[entry]  # the key is the var entry
                 data = (item.name,
                         item.checked_in_by,
                         item.customer,
@@ -412,7 +405,7 @@ class Database:
             # and send them to the db
 
             for entry in self.places:
-                place = self.places[entry] # the key is the var entry
+                place = self.places[entry]  # the key is the var entry
                 data = (place.name,
                         place.description,
                         place.airport_code,
@@ -443,11 +436,12 @@ class Database:
         else:
             return max([self.items[i].id for i in self.items])
 
-    def return_item_by_id(self, id) -> Item:
+    def return_item_by_id(self, id_reference) -> Item:
         # take an id number and return an item from it
-        return self.items[id]
+        return self.items[id_reference]
 
-    def clear_rows_of(self,table) -> None:
+    def clear_rows_of(self, table) -> None:
+        # this is a static method - apparently there's a better way to do this, not going to mess with it now
         try:
             # this will clear all the stuff from whatever table you specify
             statement = """DELETE from """ + str(table) + ";"
@@ -458,8 +452,4 @@ class Database:
         except Exception as err:
             print("Error processing SQL in clear_rows_of function")
             print(err)
-
-
-
-
 

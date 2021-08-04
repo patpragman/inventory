@@ -236,7 +236,7 @@ def cart(status=0, item_id=None) -> str:
                 return render_template("label.html",
                                        item=db.items[item_id],
                                        user=db.people[session["username"]],
-                                       address="https://" + config.Config.global_addy + db.items[item_id].make_cart_load_url())
+                                       address=config.Config.global_addy + db.items[item_id].make_cart_load_url())
             else:
                 raise InvalidRequest("Carts meed the variable 0, 1, 2, or 3.  Those values must be interpreted by Flask as strings, and type casting might have broken.")
 

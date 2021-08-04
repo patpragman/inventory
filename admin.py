@@ -2,6 +2,7 @@ import sqlite3
 from passlib.context import CryptContext
 import datetime
 import config
+from sql import *
 
 
 class Person:
@@ -152,25 +153,17 @@ class Database:
         self.items = {}
         self.places = {}
 
-        # first let's write the SQL to update the db
-        sql_query = 'select * from person'
+        # here are the SQL queries we'll use to access the db and query it
+        person_query = 'select * from person'
+        item_query = 'select * from item'
+        place_query = 'select * from place'
 
-        # i repeat the following code multiple times for items and places
-        # why?  because I haven't refactored it yet - also because I'm lazy
-        # change when able, make this programmatic or whatever, for now, yeah
-        # also I'm not sure if this would be come a mess of dependencies either
-        # seems easier just to be explicit about what we're doing here.
+        # try to connect, then build persons, items, and places objects
         try:
-            # connect to the database
-            conn = sqlite3.connect(Database.location)
-            cur = conn.cursor()
-
-            # let's execute the query listed outside of the try
-            cur.execute(sql_query)
-            rows = cur.fetchall()  # get all the rows
-
-            for row in rows:
-                # Iterate through all the rodes, make a new node with the lat_lons
+            # let's connect to the database and get the person objects out of it
+            person_query_row = query_database(person_query, Database.location)
+            for row in person_query_row:
+                # Iterate through all the rows, make a new node with the lat_lons
                 person = Person()
                 person.first_name = row[0]
                 person.last_name = row[1]
@@ -188,26 +181,9 @@ class Database:
 
                 self.people[person.username] = person
 
-            conn.close()  # close the database
-
-        except sqlite3.Error as e:
-            print("Error loading people.  See following error:")
-            print(e)
-
-        # now let's connect to the database again and snag the items
-        # we use a try/except here as shitty error handling
-        # we need a new SQL Query - let's make another one
-        sql_query = 'select * from item'
-        try:
-            # connect to the database...again
-            conn = sqlite3.connect(Database.location)
-            cur = conn.cursor()
-
-            # let's execute the query listed outside of the try
-            cur.execute(sql_query)
-            rows = cur.fetchall()  # get all the rows
-
-            for row in rows:
+            # now let's get all the items
+            item_query_rows = query_database(item_query, Database.location)
+            for row in item_query_rows:
                 # Iterate through all the rows, build a new item for each one
                 item = Item()
                 item.name = row[0]
@@ -233,24 +209,9 @@ class Database:
 
                 self.items[item.id] = item
 
-            conn.close()  # close the database
-
-        except sqlite3.Error as e:
-            print("Error loading items.  See following error:")
-            print(e)
-
-        # same thing as above but we're get the places
-        sql_query = 'select * from place'
-        try:
-            # connect to the database...again
-            conn = sqlite3.connect(Database.location)
-            cur = conn.cursor()
-
-            # let's execute the query listed outside of the try
-            cur.execute(sql_query)
-            rows = cur.fetchall()  # get all the rows
-
-            for row in rows:
+            # finally the places
+            place_query_rows = query_database(place_query, Database.location)
+            for row in place_query_rows:
                 # Iterate through all the rodes, make a new node with the lat_lons
                 place = Place()
                 place.name = row[0]
@@ -260,11 +221,10 @@ class Database:
 
                 self.places[place.name] = place
 
-            conn.close()  # close the database
-
         except sqlite3.Error as e:
-            print("Error loading places.  See following error:")
+            print("Error loading items.  See following error:")
             print(e)
+
 
     def save_people(self) -> bool:
         # first we'll delete all the people out of the db so we don't end up with copies

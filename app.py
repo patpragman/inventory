@@ -589,6 +589,5 @@ def edit_places() -> str:
 
 # we'll use SSL to hide submitted passwords
 if __name__ == '__main__':
-    app.run(ssl_context=config.Config.ssl_context,
-            host=config.Config.host)
+    app.run(ssl_context=config.Config.ssl_context)
 

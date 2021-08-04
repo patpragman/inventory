@@ -1,4 +1,4 @@
-import os
+# eventually I'll manage all the dependencies in here I think
 
 class Config:
     # config status for setting up individual instances of the app

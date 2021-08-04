@@ -9,6 +9,7 @@ import datetime
 
 app = Flask(__name__)
 app.secret_key = config.Config.secret_key  # set the secret key on startup
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # this is so the browser doesn't cache the pages between loads
 
 # load the database into memory
 db = Database()

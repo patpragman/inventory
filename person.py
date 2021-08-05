@@ -9,7 +9,7 @@ class Person:
     pwd_context = CryptContext(schemes=["pbkdf2_sha256"],
                                deprecated="auto")  # this is the password context for passlib
 
-    sql_query = """
+    update_sql = """
     insert or replace into person (
         first_name,
         last_name,

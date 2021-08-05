@@ -1,13 +1,18 @@
 <html>
-<title>Control Panel</title>
+<head>
+    <title>Control Panel</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
 <body>
 <h3>Welcome, {{person.username}}!</h3>
 <p>This is the user control panel.  You can do several things from here.  You can edit your profile, manage carts, items, places, and people in the database.  You can also get information.</p>
-<p><a href="/edit_personal_user">Edit your user profile. (ugly) </a></p>
-<p><a href="/cart">Cart Management</a> </p>
-<p><a href="/edit_item">Manage Warehouse</a> </p> <!-- combine these two bits of code -->
-<p><a href="/edit_customer">Manage Customers</a> </p>
-<p><a href="/edit_place">Place Management</a></p>
-<p><a href="/logout">Log out.</a></p>
+    <div class="container">
+        <a class="btn btn-primary btn-toolbar" href="/edit_personal_user">Edit your user profile. (ugly)</a>
+        <a class="btn btn-primary btn-toolbar" href="/cart">Cart Management</a>
+        <a class="btn btn-primary btn-toolbar" href="/edit_item">Manage Warehouse</a>
+        <a class="btn btn-primary btn-toolbar" href="/edit_customer">Manage Customers</a>
+        <a class="btn btn-primary btn-toolbar" href="/edit_place">Place Management</a>
+        <a class="btn btn-primary btn-toolbar" href="/logout">Log out.</a>
+    </div>
 </body>
 </html>

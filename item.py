@@ -94,7 +94,7 @@ class Item:
         # recall that a status of
         return "cart/" + "3" + "/" + str(self.id)
 
-    def generate_payload(self) -> str:
+    def generate_payload(self) -> tuple:
         data = (self.name,
                 self.checked_in_by,
                 self.customer,

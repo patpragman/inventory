@@ -1,6 +1,6 @@
 import sqlite3
 import config
-from sql import query_database, clear_rows_of
+from sql import query_database, clear_rows_of, insert_or_update_database
 from person import Person
 from item import Item
 from place import Place
@@ -68,64 +68,23 @@ class Database:
                 print("An unknown error occurred.")
                 print(err)
 
-    def save_people(self) -> bool:
+    def save_people(self) -> None:
         # first we'll delete all the people out of the db so we don't end up with copies
         clear_rows_of("person", Database.location)
         # next let's put all the people into the database
         # first let's write the SQL to update the db
-        sql_query = """
-        insert or replace into person (
-            first_name,
-            last_name,
-            address,
-            phone,
-            email,
-            notes,
-            username,
-            password,
-            is_employee,
-            last_logon,
-            is_active,
-            log)
-        values (?,?,?,?,?,?,?,?,?,?,?, ?);
-        """
 
         try:
-            # connect to the database
-            conn = sqlite3.connect(Database.location)
-            cur = conn.cursor()
 
-            # let's iterate through the people in the program
-            # and send them to the db
-
+            # iterate each person and mash them into the database
             for entry in self.people:
                 person = self.people[entry]  # the key is the var entry
-                data = (person.first_name,
-                        person.last_name,
-                        person.address,
-                        person.phone,
-                        person.email,
-                        person.notes,
-                        person.username,
-                        person.password,
-                        person.is_employee,
-                        person.is_admin,
-                        int(person.is_active),
-                        person.log
-                        )
-                cur.execute(sql_query, data)
-
-            conn.commit()
-            conn.close()
-
-            result = True
+                insert_or_update_database(Person.sql_query, person.generate_payload(), Database.location)
 
         except sqlite3.Error as e:
             print("Error updating people database.  See following error:")
             print(e)
-            result = False
 
-        return result
 
     def save_items(self) -> bool:
         # first let's clear out all the items that were previously in the SQL db

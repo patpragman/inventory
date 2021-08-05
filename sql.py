@@ -25,3 +25,16 @@ def clear_rows_of(table: str, database_path: str) -> None:
     except Exception as err:
         print("Error processing SQL in clear_rows_of function")
         print(err)
+
+
+def insert_or_update_database(sql_query: str, data: tuple, database_path: str) -> None:
+    try:
+        # connect to the database
+        conn = sqlite3.connect(database_path)
+        cur = conn.cursor()
+        cur.execute(sql_query, data)
+        conn.commit()
+        conn.close()
+    except Exception as err:
+        print('There was an error inserting into the database:')
+        print(str(err))

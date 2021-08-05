@@ -9,6 +9,24 @@ class Person:
     pwd_context = CryptContext(schemes=["pbkdf2_sha256"],
                                deprecated="auto")  # this is the password context for passlib
 
+    sql_query = """
+    insert or replace into person (
+        first_name,
+        last_name,
+        address,
+        phone,
+        email,
+        notes,
+        username,
+        password,
+        is_employee,
+        last_logon,
+        is_active,
+        log)
+    values (?,?,?,?,?,?,?,?,?,?,?, ?);
+    """
+
+
     def __init__(self,
                  first_name: str = "Guy",
                  last_name: str = "Manderson",
@@ -79,3 +97,21 @@ class Person:
     def log_purge(self, by="software") -> None:
         self.log = ""
         self.update_log("Logs purged", by=by)
+
+    def generate_payload(self) -> tuple:
+
+        data = (self.first_name,
+                self.last_name,
+                self.address,
+                self.phone,
+                self.email,
+                self.notes,
+                self.username,
+                self.password,
+                self.is_employee,
+                self.is_admin,
+                int(self.is_active),
+                self.log
+                )
+        return data
+

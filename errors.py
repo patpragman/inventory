@@ -1,3 +1,4 @@
+
 class DucplicateUserError(Exception):
 
     def __init__(self, duplicate_username: str, attempting_user: str):
@@ -7,6 +8,7 @@ class DucplicateUserError(Exception):
 
     def __str__(self):
         return "User " + self.duplicate_username + " already exists in the database."
+
 
 class UnknownUserError(Exception):
 
@@ -18,6 +20,7 @@ class UnknownUserError(Exception):
 
         return "User " + self.username_guess + " is not found."
 
+
 class BlankValueError(Exception):
 
     def __init__(self, note):
@@ -27,6 +30,7 @@ class BlankValueError(Exception):
     def __str__(self) -> str:
 
         return "The server didn't recieve the required data.  " + self.note
+
 
 class InvalidPassword(Exception):
 
@@ -48,6 +52,7 @@ class NotLoggedInError(Exception):
     def __str__(self) -> str:
 
         return "Trying to access a page while not logged in. " + self.note
+
 
 class InvalidRequest(Exception):
 

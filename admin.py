@@ -79,69 +79,30 @@ class Database:
             # iterate each person and mash them into the database
             for entry in self.people:
                 person = self.people[entry]  # the key is the var entry
-                insert_or_update_database(Person.sql_query, person.generate_payload(), Database.location)
+                insert_or_update_database(Person.update_sql, person.generate_payload(), Database.location)
 
         except sqlite3.Error as e:
             print("Error updating people database.  See following error:")
             print(e)
 
-
-    def save_items(self) -> bool:
+    def save_items(self) -> None:
         # first let's clear out all the items that were previously in the SQL db
         clear_rows_of("item", Database.location)
         # now we'll put all the items bak into the db
         # first let's write the SQL to update the db
-        sql_query = """
-        insert or replace into item (
-            name,
-            checked_in_by,
-            customer,
-            weight,
-            volume,
-            price,
-            description,
-            paid,
-            origin,
-            destination,
-            id)
-        values (?,?,?,?,?,?,?,?,?,?,?);
-        """
 
         try:
-            # connect to the database
-            conn = sqlite3.connect(Database.location)
-            cur = conn.cursor()
-
-            # let's iterate through the people in the program
-            # and send them to the db
-
+            # iterate through the items in the database
+            # then insert or update each one into the actual SQL database
+            # then
             for entry in self.items:
                 item = self.items[entry]  # the key is the var entry
-                data = (item.name,
-                        item.checked_in_by,
-                        item.customer,
-                        item.weight,
-                        item.volume,
-                        item.price,
-                        item.description,
-                        item.paid,
-                        item.origin,
-                        item.destination,
-                        item.id
-                        )
-                cur.execute(sql_query, data)
-
-            conn.commit()
-            conn.close()
-
-            result = True
+                insert_or_update_database(item.update_sql, item.generate_payload(), Database.location)
 
         except sqlite3.Error as e:
             print("Error updating items database.  See following error:")
             print(e)
             result = False
-
-        return result
 
     def save_places(self) -> bool:
         # first part is to clear the database of all the old places

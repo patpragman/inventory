@@ -1,5 +1,23 @@
 import config
+
+
 class Item:
+
+    update_sql = """
+    insert or replace into item (
+        name,
+        checked_in_by,
+        customer,
+        weight,
+        volume,
+        price,
+        description,
+        paid,
+        origin,
+        destination,
+        id)
+    values (?,?,?,?,?,?,?,?,?,?,?);
+    """
 
     def __init__(self,
                  name: str = "item",
@@ -75,3 +93,18 @@ class Item:
         # takes a cart item and produces a cart load url
         # recall that a status of
         return "cart/" + "3" + "/" + str(self.id)
+
+    def generate_payload(self) -> str:
+        data = (self.name,
+                self.checked_in_by,
+                self.customer,
+                self.weight,
+                self.volume,
+                self.price,
+                self.description,
+                self.paid,
+                self.origin,
+                self.destination,
+                self.id
+                )
+        return data

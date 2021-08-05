@@ -73,7 +73,7 @@
         <p> From:
         <select id="origin" name="origin">
         {% for place in places %}
-        <option value="{{place.airport_code}}" {% if place.airport_code ==  item.orgin %} selected {% endif %} >{{place.name}} {{place.airport_code}}</option>
+        <option value="{{place.airport_code}}" {% if place.airport_code ==  item.origin %} selected {% endif %} >{{place.name}} {{place.airport_code}}</option>
             {% endfor %}} </select> ->
         <select id="destination" name="destination">
         {% for place in places %}

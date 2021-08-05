@@ -57,9 +57,10 @@ class InvalidRequest(Exception):
     def __str__(self):
         return self.note
 
+
 class ItemNotFound(Exception):
 
-    def __init(self):
+    def __init__(self):
 
         self.note = "Item not found in the database."
 

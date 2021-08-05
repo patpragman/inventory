@@ -5,6 +5,7 @@ from flask_session import Session
 from admin import *
 from person import Person
 from item import Item
+from place import Place
 import datetime
 
 app = Flask(__name__)

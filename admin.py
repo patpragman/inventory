@@ -3,19 +3,7 @@ import config
 from sql import query_database, clear_rows_of
 from person import Person
 from item import Item
-
-
-class Place:
-
-    def __init__(self,
-                 name: str = "Anytown USA",
-                 description: str = "middle of nowhere",
-                 airport_code: str = "PANC",
-                 price: int = 0) -> None:
-        self.name = name
-        self.description = description
-        self.airport_code = airport_code
-        self.price = price  # again make sure this is an integer to eliminate rounding errors
+from place import Place
 
 
 class Cart:
@@ -68,12 +56,7 @@ class Database:
             place_query_rows = query_database(place_query, Database.location)
             for row in place_query_rows:
                 # Iterate through all the rodes, make a new node with the lat_lons
-                place = Place()
-                place.name = row[0]
-                place.description = row[1]
-                place.airport_code = row[2]
-                place.price = row[3]
-
+                place = Place(row=row)
                 self.places[place.name] = place
 
         except Exception as err:

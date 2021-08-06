@@ -158,7 +158,7 @@
         </select>
 
         <label for="new_destination">To</label>
-        <select class="btn btn-" id="new_destination" name="destination">
+        <select class="form-control" id="new_destination" name="destination">
             {% for place in places %}
             <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
             {% endfor %}}

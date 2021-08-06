@@ -31,51 +31,66 @@
 <body>
 <h3>Welcome, {{user.username}}.</h3>
 <p>You can edit customer data below - be advised, they do not save unless you click save.</p>
-<p>Sort by <a href="#">Username</a> <a href="#">First Name</a> <a href="#">Last Name</a></p>
+<label for="search_bar">Search:</label>
+<input class="form-control" id="search_bar" onkeyup="search();">
 
-{% for person in people %}
-<div class="customer_edit_box {{person.username}} {{person.first_name}} {{person.last_name}}" id="{{person.username}}">
+<div id="customer_edit_div">
+    {% for person in people %}
+    <div class="customer_edit_box user__{{person.username}} first_name__{{person.first_name}} last_name__{{person.last_name}}" id="{{person.username}}">
+        <div class="form-group">
+            <!--Each person input box gets a form to submit that ties to an individual in the db -->
+            <h3>User ID: {{person.username}} First Name: {{person.first_name}} Last Name:  {{person.last_name}}</h3>
+            <form action="/edit_customer" method="post">
+                <input type="hidden" name="name" value="{{person.username}}">
+                <label for="first_name">First name</label>
+                <input class="form-control"id="first_name" value="{{person.first_name}}" name="first_name">
 
-    <!--Each person input box gets a form to submit that ties to an individual in the db -->
-    <h3>User ID or User Token:  {{person.username}}</h3>
-    <form action="/edit_customer" method="post">
-        <input type="hidden" name="name" value="{{person.username}}">
-        <p>First name:  <input value="{{person.first_name}}" name="first_name"></p>
-        <p>Last name:  <input value="{{person.last_name}}" name="last_name"></p>
-        <p>Phone Number:  <input value="{{person.phone}}" name="phone"></p>
-        <p>Email:  <input value="{{person.email}}" name="email"></p>
-        <textarea name="address">{{person.address}}</textarea>
-        <textarea name="notes">{{person.notes}}</textarea>
-        <input type="submit">
-    </form>
+                <label for="last_name">Last name:</label>
+                <input class="form-control"id="last_name" value="{{person.last_name}}" name="last_name">
+
+                <label for="phone">Phone Number</label>
+                <input class="form-control"id="phone" value="{{person.phone}}" name="phone">
+
+                <label for="email">Email</label>
+                <input class="form-control" id="email" value="{{person.email}}" name="email">
+
+                <label for="address">Address</label>
+                <textarea class="form-control" rows=4 cols="50" id="address" name="address">{{person.address}}</textarea><br>
+
+                <label for="notes">Notes</label>
+                <textarea class="form-control" rows=4 cols=50 id="notes" name="notes">{{person.notes}}</textarea>
+                <input  class="brn btn-primary" value="Edit User" type="submit">
+            </form>
+        </div>
+    </div>
+    {% endfor %}
 </div>
-{% endfor %}
 
 <div class="new_customer_edit_box">
     <form action="/new_customer" method="post">
         <div class="form-group">
             <h1>New Customer:</h1>
 
-            <label for="firstname">First Name</label>
-            <input class="form-control"  type="text" name="first_name" id="firstname">
+            <label for="first_name_new">First Name</label>
+            <input class="form-control"  type="text" name="first_name_new" id="first_name_new">
 
-            <label for="last_name">Last Name</label>
-            <input class="form-control"  type="text" id=last_name name="last_name">
+            <label for="last_name_new">Last Name</label>
+            <input class="form-control"  type="text" id="last_name_new" name="last_name">
             <br>
 
-            <label for="phone">Phone</label>
-            <input class="form-control"  type="text" id="phone"name="phone">
+            <label for="phone_new">Phone</label>
+            <input class="form-control"  type="text" id="phone_new"name="phone">
 
-            <label for="email">Email</label><br>
-            <input class="form-control"  type="text" id="email" name="email">
+            <label for="email_new">Email</label><br>
+            <input class="form-control"  type="text" id="email_new" name="email">
             <br>
 
-            <label for="notes">Notes</label><br>
-            <textarea class="form-control" cols=50, rows=4 id="notes" name="notes">Enter notes here.</textarea>
+            <label for="notes_new">Notes</label><br>
+            <textarea class="form-control" cols=50 rows=4 id="notes_new" name="notes">Enter notes here.</textarea>
             <br>
 
-            <label for="address">Address</label><br>
-            <textarea class="form-control" cols=50, rows=4 id="address" name="address" >Please enter your address.</textarea>
+            <label for="address_new">Address</label><br>
+            <textarea class="form-control" cols=50 rows=4 id="address_new" name="address" >Please enter your address.</textarea>
             <br><br>
 
             <input id="submit_button" class="btn btn-primary" value="Create New User" type="submit">
@@ -85,6 +100,34 @@
 
 
 <br>
-<a href="/control_panel">Control Panel</a>
+<a href="/control_panel">Back to Control Panel</a>
 </body>
+<script>
+    //sort through scroll to the first div that matches
+    function search(){
+        //this fires whenever the search bar or the sort by dropdown changes
+        // first let's get the search bar and the select menu so we can tinker with their values
+        var search_bar = document.getElementById("search_bar");
+
+        var filter = search_bar.value.toUpperCase();
+        console.log(filter)//
+        var customer_edit_boxes = document.getElementsByClassName("customer_edit_box");
+        var i; //for iterating - i get it.... sorry
+        var div;
+
+        //adapted from code at w3 schools
+        //this iterates through the customer edit boxes, makes a div to mess with
+        //then finds the index of the filter in the class name
+        for (i = 0; i < customer_edit_boxes.length; i++) {
+            div = customer_edit_boxes[i]; // get one of the divs with customer edit info
+            var txtValue = div.className;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                div.style.display = "";
+            } else {
+                div.style.display = "none";
+            }
+        }
+
+    }
+</script>
 </html>

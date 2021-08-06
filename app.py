@@ -511,7 +511,6 @@ def new_item() -> str:
             item.checked_in_by = request.form["checked_in_by"]
             item.customer = request.form["customer"]
             item.weight = request.form["weight"]
-            item.price = request.form["price"]
             item.description = request.form["description"]
             item.origin = request.form["origin"]
             item.destination = request.form["destination"]

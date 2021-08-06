@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 </head>
+<script src="{{url_for('static', filename='search.js')}}"></script>
 <style>
     .customer_edit_box {
         background-color: aquamarine; /* this can be changed - just fucking around for now */
@@ -32,7 +33,7 @@
 <h3>Welcome, {{user.username}}.</h3>
 <p>You can edit customer data below - be advised, they do not save unless you click save.</p>
 <label for="search_bar">Search:</label>
-<input class="form-control" id="search_bar" onkeyup="search();">
+<input class="form-control" id="search_bar" onkeyup="search('customer_edit_box');">
 
 <div id="customer_edit_div">
     {% for person in people %}
@@ -40,27 +41,27 @@
         <div class="form-group">
             <!--Each person input box gets a form to submit that ties to an individual in the db -->
             <h3>User ID: {{person.username}} First Name: {{person.first_name}} Last Name:  {{person.last_name}}</h3>
-            <form action="/edit_customer" method="post">
-                <input type="hidden" name="name" value="{{person.username}}">
-                <label for="first_name">First name</label>
-                <input class="form-control"id="first_name" value="{{person.first_name}}" name="first_name">
+                <form action="/edit_customer" method="post">
+                    <input type="hidden" name="name" value="{{person.username}}">
+                    <label for="first_name">First name</label>
+                    <input class="form-control"id="first_name" value="{{person.first_name}}" name="first_name">
 
-                <label for="last_name">Last name:</label>
-                <input class="form-control"id="last_name" value="{{person.last_name}}" name="last_name">
+                    <label for="last_name">Last name:</label>
+                    <input class="form-control"id="last_name" value="{{person.last_name}}" name="last_name">
 
-                <label for="phone">Phone Number</label>
-                <input class="form-control"id="phone" value="{{person.phone}}" name="phone">
+                    <label for="phone">Phone Number</label>
+                    <input class="form-control"id="phone" value="{{person.phone}}" name="phone">
 
-                <label for="email">Email</label>
-                <input class="form-control" id="email" value="{{person.email}}" name="email">
+                    <label for="email">Email</label>
+                    <input class="form-control" id="email" value="{{person.email}}" name="email">
 
-                <label for="address">Address</label>
-                <textarea class="form-control" rows=4 cols="50" id="address" name="address">{{person.address}}</textarea><br>
+                    <label for="address">Address</label>
+                    <textarea class="form-control" rows=4 cols="50" id="address" name="address">{{person.address}}</textarea><br>
 
-                <label for="notes">Notes</label>
-                <textarea class="form-control" rows=4 cols=50 id="notes" name="notes">{{person.notes}}</textarea>
-                <input  class="brn btn-primary" value="Edit User" type="submit">
-            </form>
+                    <label for="notes">Notes</label>
+                    <textarea class="form-control" rows=4 cols=50 id="notes" name="notes">{{person.notes}}</textarea>
+                    <input  class="brn btn-primary" value="Edit User" type="submit">
+                </form>
         </div>
     </div>
     {% endfor %}
@@ -102,32 +103,4 @@
 <br>
 <a href="/control_panel">Back to Control Panel</a>
 </body>
-<script>
-    //sort through scroll to the first div that matches
-    function search(){
-        //this fires whenever the search bar or the sort by dropdown changes
-        // first let's get the search bar and the select menu so we can tinker with their values
-        var search_bar = document.getElementById("search_bar");
-
-        var filter = search_bar.value.toUpperCase();
-        console.log(filter)//
-        var customer_edit_boxes = document.getElementsByClassName("customer_edit_box");
-        var i; //for iterating - i get it.... sorry
-        var div;
-
-        //adapted from code at w3 schools
-        //this iterates through the customer edit boxes, makes a div to mess with
-        //then finds the index of the filter in the class name
-        for (i = 0; i < customer_edit_boxes.length; i++) {
-            div = customer_edit_boxes[i]; // get one of the divs with customer edit info
-            var txtValue = div.className;
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                div.style.display = "";
-            } else {
-                div.style.display = "none";
-            }
-        }
-
-    }
-</script>
 </html>

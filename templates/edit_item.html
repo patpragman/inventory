@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 </head>
+<script src="{{url_for('static', filename='search.js')}}"></script>
 <style>
 
     .item_edit_box {
@@ -44,91 +45,126 @@
 
 </style>
 <body>
-<h3>Current User: {{user.first_name}} {{user.last_name}} - username {{user.username}}</h3>
-<p>You can edit items below - be advised, they do not save you click save.</p>
-<p>Sort by <a href="#">Name</a> <a href="#">Description</a> <a href="#">Origin</a> <a href="#">Destination</a> <a href="#">Customer</a></p>
-{% for item in items %}
-<div class="item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}}" id="{{item.id}}"  style="float: inside" >
 
-    <!--Each item input box gets a form to submit that ties to an individual item in the db -->
-    <form action="/edit_item" method="post">
-        <input type="hidden" name="id" value="{{ item.id }}">
-        <p>Description:  <textarea name="description">{{item.description}}</textarea>  Database Short Name:  <input name="name" value="{{item.name}}"></p>
-        <h3>Checked in by:</h3>
-        <div class="dropdown_box">
-        <select id="checked_in_by" name="checked_in_by">
-        {% for person in people %}
-        <option value="{{person.username}}" {% if person.username ==  item.checked_in_by %} selected {% endif %} >{{person.first_name}} {{person.last_name}}</option>
-        {% endfor %}}
-        </select>
+<h3>Welcome, {{user.username}}.</h3>
+<p>You can edit items below - be advised, they do not save unless you click save.</p>
+<label for="search_bar">Search:</label>
+<input class="form-control" id="search_bar" onkeyup="search('item_edit_box');">
 
-        <h3>Customer:</h3>
-        <select id="customer" name="customer">
-            {% for customer in people %}
-            <option value="{{customer.username}}"{% if customer.username ==  item.customer %} selected {% endif %}>{{customer.first_name}} {{customer.last_name}}</option>
+
+
+
+<div id="item_edit_div">
+
+    {% for item in items %}
+    <div class="form-group item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}} {{item.notes}}" id="{{item.id}}"  style="float: inside" >
+
+        <!--Each item input box gets a form to submit that ties to an individual item in the db -->
+        <form action="/edit_item" method="post">
+            <input type="hidden" name="id" value="{{ item.id }}">
+
+            <label for="short_name">Short Description</label>
+            <input class="form-control" id="short_name" name="name" value="{{item.name}}">
+            <br>
+
+            <label for="description">Detailed</label>
+            <textarea class="form-control" id="description" rows=4 cols=200 name="description">{{item.description}}</textarea>
+            <br>
+
+            <label class="form-control" for="checked_in_by">Checked in by:</label>
+            <select id="checked_in_by" name="checked_in_by">
+                {% for person in people %}
+                <option value="{{person.username}}" {% if person.username ==  item.checked_in_by %} selected {% endif %} >{{person.first_name}} {{person.last_name}}</option>
+                {% endfor %}}
+            </select>
+
+            <label for="customer">Customer</label>
+            <select class="form-control" id="customer" name="customer">
+                {% for customer in people %}
+                <option value="{{customer.username}}"{% if customer.username ==  item.customer %} selected {% endif %}>{{customer.first_name}} {{customer.last_name}}</option>
+                {% endfor %}}
+            </select>
+            <br>
+
+            <!--Eventually all the numbers stuff will go between these two brs-->
+            <label for="weight">Weight (lbs)</label>
+            <input class="form-control" id="weight" type="number" name="weight" value={{ item.weight }}>
+            <br>
+
+            <label for="origin">From</label>
+            <select class="form-control" id="origin" name="origin">
+                {% for place in places %}
+                <option value="{{place.airport_code}}" {% if place.airport_code ==  item.origin %} selected {% endif %} >{{place.name}} {{place.airport_code}}</option>
+                {% endfor %}}
+            </select>
+
+
+            <label for="destination">To</label>
+            <select class="form-control" id="destination" name="destination">
+                {% for place in places %}
+                <option value="{{place.airport_code}}" {% if place.airport_code ==  item.destination %} selected {% endif %} >{{place.name}} {{place.airport_code}}</option>
+                {% endfor %}}
+            </select>
+
+
+            <a class="btn btn-primary" href="{{item.cart_load_url}}">Add item to current cart</a>
+            <a class="btn btn-primary" href="{{item.qr_code_url}}">Generate Label</a>
+
+            <input class="btn btn-primary" type="submit" value="Update">
+
+        </form>
+
+    </div>
+    {% endfor %}
+</div>
+
+<div class="new_item_edit_box form-group">
+    <h3>Add to the warehouse</h3>
+
+    <form action="/new_item" method="POST">
+        <label for="new_short_name">Short Description</label>
+        <input class="form-control" id="new_short_name" name="name">
+        <br>
+
+        <label for="new_description">Detailed Description</label>
+        <textarea class="form-control" id="new_description" rows=4 cols=200 name="description"></textarea>
+        <br>
+
+        <label class="form-control" for="new_checked_in_by">Checked in by:</label>
+        <select id="new_checked_in_by" name="checked_in_by">
+            {% for person in people %}
+            <option value="{{person.username}}" {% if person.username ==  user.username %} selected {% endif %} >{{person.first_name}} {{person.last_name}}</option>
             {% endfor %}}
         </select>
-        </div>
-        <div align="left">
-            <p>Weight: <input id="weight" type="number" name="weight" value={{ item.weight }} > lbs</p>
-        </div>
-        <p> From:
-        <select id="origin" name="origin">
-        {% for place in places %}
-        <option value="{{place.airport_code}}" {% if place.airport_code ==  item.origin %} selected {% endif %} >{{place.name}} {{place.airport_code}}</option>
-            {% endfor %}} </select> ->
-        <select id="destination" name="destination">
-        {% for place in places %}
-        <option value="{{place.airport_code}}" {% if place.airport_code ==  item.destination %} selected {% endif %} >{{place.name}} {{place.airport_code}}</option>
-            {% endfor %}} </select>
-        </p>
-        <a href="{{item.cart_load_url}}">Add item to current cart</a>
-        <a href="{{item.qr_code_url}}">Generate Label</a>
 
-        <input type="submit">
-
-    </form>
-
-</div>
-{% endfor %}
-
-<div class="new_item_edit_box" style="float: outside">
-    <h3>Make new item:</h3>
-    <form action="/new_item" method="POST">
-        <p>Description:  <textarea name="description">Type a short description</textarea>  Database Short Name:  <input name="name" value="Type something here!"></p>
-        <h3>Checked in by:</h3>
-        <div class="dropdown_box">
-        <select id="checked_in_by" name="checked_in_by">
-        {% for person in people %}
-        <option value="{{person.username}}" {% if person.username ==  user.username %} selected {% endif %} >{{person.first_name}} {{person.last_name}}</option>
-        {% endfor %}}
-        </select>
-
-        <h3>Customer:</h3>
-        <select id="customer" name="customer">
+        <label for="new_customer">Customer</label>
+        <select class="form-control" id="new_customer" name="customer">
             {% for customer in people %}
             <option value="{{customer.username}}">{{customer.first_name}} {{customer.last_name}}</option>
             {% endfor %}}
         </select>
-        </div>
-        <div align="left">
-            <p>Weight: <input id="weight" type="number" name="weight" value=1> lbs</p>
-            <p>Price $<input id="price" type="number" name="price" value=10></p>
-        </div>
-        <p> From:
-        <select id="origin" name="origin">
-        {% for place in places %}
-        <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
-            {% endfor %}} </select> ->
-        <select id="destination" name="destination">
-        {% for place in places %}
-        <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
-            {% endfor %}} </select>
+        <br>
 
-        </p>
+        <!--Eventually all the numbers stuff will go between these two brs-->
+        <label for="new_weight">Weight (lbs)</label>
+        <input class="form-control" id="new_weight" type="number" name="weight">
+        <br>
 
-        <input type="submit">
+        <label for="new_origin">From</label>
+        <select class="form-control" id="new_origin" name="origin">
+            {% for place in places %}
+            <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
+            {% endfor %}}
+        </select>
 
+        <label for="new_destination">To</label>
+        <select class="btn btn-" id="new_destination" name="destination">
+            {% for place in places %}
+            <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
+            {% endfor %}}
+        </select>
+
+        <input class="btn btn-primary" type="submit" value="Create">
     </form>
 </div>
 <br>

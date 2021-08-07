@@ -470,7 +470,7 @@ def new_customer() -> str:
         else:
             raise InvalidRequest("/create_new_customer can only accept a get or a post.")
     except Exception as err:
-        print(err)
+        print(err, type(err))
         return str(err)
 
 

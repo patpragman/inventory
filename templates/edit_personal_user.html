@@ -5,20 +5,43 @@
 
 </head>
 <body>
-    <div class="container">
+    <div class="container form-group">
         <form action="/amend_personal_data" method="post">
             <p>{{message}}</p>
-            <p>Username: <input type="text" name="username" value="{{person.username}}"></p>
+            <label for="username">Username</label>
+            <input id="username" class="form-control" type="text" name="username" value="{{person.username}}">
+            <br>
+
             <p>If you want to change your password, enter it below - otherwise input your current password in both fields.</p>
-            <p>New Password: <input type="password" name="password" id="new_password" oninput="check_match();"></p>
-            <p>Verify Password: <input type="password" name="verify_pass" oninput="check_match();" id="check"></p>
-            <p>First name: <input type="text" name="first_name" value="{{person.first_name}}"></p>
-            <p>Last name: <input type="text" name="last_name" value="{{person.last_name}}"></p>
-            <p>Phone:  <input type="text" name="phone" value="{{person.phone}}"></p>
-            <p>Email:  <input type="text" name="email" value="{{person.email}}"></p>
-            <p>Notes: <textarea cols=50, rows=4 name="notes">{{person.notes}}</textarea></p>
-            <p>Address: <textarea cols=50, rows=4 name="address" >{{person.address}} </textarea></p>
-            <input id="submit_button" type="submit">
+            <label for="password">New Password</label>
+            <input id="password" type="password" class="form-control" name="password" id="new_password" oninput="check_match();">
+
+            <label for="vpassword">Verify Password</label>
+            <input class="form-control" id="vpassword" type="password" name="verify_pass" oninput="check_match();" id="check">
+            <br>
+
+            <label for="first_name">First name:</label>
+            <input class="form-control" id="first_name"type="text" name="first_name" value="{{person.first_name}}">
+
+            <label for="last_name">Last name </label>
+            <input class="form-control" id="last_name" type="text" name="last_name" value="{{person.last_name}}">
+            <br>
+
+            <label for="phone">Phone</label><input  class="form-control" id="phone" type="text" name="phone" value="{{person.phone}}">
+            <br>
+
+            <label for="email">Email</label> <input id="email" class="form-control" type="text" name="email" value="{{person.email}}">
+            <br>
+
+            <label for="notes">Notes</label>
+            <textarea class="form-control" id="notes" cols=50 rows=4 name="notes">{{person.notes}}</textarea>
+            <br>
+
+            <label for="address">Address</label>
+            <textarea  class="form-control" id="address" cols=50, rows=4 name="address" >{{person.address}} </textarea>
+            <br>
+
+            <input class="btn btn-primary" id="submit_button" value="Update User" type="submit">
         </form>
     </div>
 </body>

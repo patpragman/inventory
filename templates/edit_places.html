@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Place Management</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 </head>
+<script src="{{url_for('static', filename='search.js')}}"></script>
 <style>
     .place_edit_box {
         background-color: cornsilk; /* this can be changed - just fucking around for now */
@@ -30,35 +31,61 @@
 </style>
 <body>
 <h3>Welcome, {{user.username}}.</h3>
-<p>You can edit customer data below - be advised, they do not save unless you click save.</p>
-<p>Sort by <a href="#">Airport Code</a> <a href="#">Name</a></p>
+<a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
+<p>You can edit location data below - be advised, they do not save unless you click save.</p>
+<label for="search_bar">Search:</label>
+<input class="form-control" id="search_bar" onkeyup="search('place_edit_box');">
 
-{% for place in places %}
-<div class="place_edit_box {{place.name}} {{place.airport_code}}}}" id="{{place.name}}">
+<div class="container">
+    <div class="place_edit_div">
+        {% for place in places %}
+        <div class="form-group place_edit_box {{place.name}} {{place.airport_code}} {{place.description}}" id="{{place.name}}">
 
-    <h3>Current Placename {{place.name}}</h3>
-    <form action="/edit_place" method="post">
-        <input type="hidden" name="name" value="{{place.name}}">
-        <p>Name:  <input value="{{place.name}}" name="new_name"></p>
-        <p>Airport Code:  <input value="{{place.airport_code}}" name="airport_code"></p>
-        <textarea name="description">{{place.description}}</textarea>
-        <input type="submit">
-    </form>
+            <h3>Edit {{place.name}}</h3>
+            <form action="/edit_place" method="post">
+                <input type="hidden" name="local_id" value="{{place.local_id}}">
+
+                <label for="place_name_input">Name</label>
+                <input class="form-control" id="place_name_input" value="{{place.name}}" name="new_name"></label>
+
+                <label for="place_airport_code_input">Airport Code</label>
+                <input class="form-control" id="place_airport_code_input" value="{{place.airport_code}}" name="airport_code">
+                <br>
+
+                <label for="place_description_input">Description</label>
+                <textarea class="form-control" id="place_description_input" name="description">{{place.description}}</textarea>
+
+                <input class="btn btn-primary" type="submit" value="Update Location">
+            </form>
+        </div>
+        {% endfor %}
+    </div>
 </div>
-{% endfor %}
 
-<div class="new_place_edit_box">
+<div class="container">
+    <div class="new_place_edit_box">
+        <div class="form-group" id="new_place_form">
 
-    <h3>Create a new place:</h3>
-    <form action="/new_place" method="POST">
-        <p>Name:  <input name="name"></p>
-        <p>Airport Code:  <input name="airport_code"></p>
-        <textarea name="description"></textarea>
-        <input type="submit">
-    </form>
+            <h3>Create New Place</h3>
+            <form action="/new_place" method="post">
+
+                <label for="new_place_name_input">Name</label>
+                <input class="form-control" id="new_place_name_input" name="name"></label>
+
+                <label for="new_place_airport_code_input">Airport Code</label>
+                <input class="form-control" id="new_place_airport_code_input" name="airport_code">
+                <br>
+
+                <label for="new_place_description_input">Description</label>
+                <textarea class="form-control" id="new_place_description_input" name="description"></textarea>
+
+                <input class="btn btn-primary" type="submit" value="Create New Location">
+            </form>
+        </div>
+    </div>
 </div>
 
 <br>
-<a href="/control_panel">Control Panel</a>
 </body>
+
 </html>

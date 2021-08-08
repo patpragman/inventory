@@ -76,7 +76,7 @@ def main() -> str:
                 return render_template("/login.html", message="Authentication failed.  Check password.")
             elif isinstance(login_error, KeyError):
                 #  if you're not logged in, a key_error gets thrown
-                return render_template("/login.html", message="Not logged in.  Please log in.")
+                return render_template("/login.html", message="Please log in.")
             else:
                 print("There was some sort of error that we couldn't handle")
                 print(login_error, type(login_error))
@@ -551,7 +551,10 @@ def new_place() -> str:
             place.airport_code = request.form["airport_code"]
             place.description = request.form["description"]
             # place.price = request.form["price"]  # when implemented
-            db.places[request.form["name"]] = place
+
+            current_db_size = len(db.places)
+            place.local_id = current_db_size + 1
+            db.places[place.local_id] = place
             return redirect("/edit_place")
         else:
             raise InvalidRequest("Only supported methods are GET and POST.")
@@ -574,15 +577,12 @@ def edit_places() -> str:
                                    places=[db.places[place] for place in db.places])
         elif request.method == "POST":
             # get the referenced place
-            new_name = request.form["name"]
-            place = db.places[new_name]
-            old_name = place.name  # copy the old name so we can pop it out of the dictionary later
-            place.name = request.form["new_name"]  # get the new name
+            new_name = request.form["new_name"]
+            place = db.places[request.form['local_id']]
+            place.name = new_name  # change the name
             place.airport_code = request.form["airport_code"]
             place.description = request.form["description"]
-            db.places[place.name] = place
-            # finally, delete the old key-value pair
-            del db.places[old_name]
+            db.places[place.local_id] = place
 
             return render_template("edit_places.html",
                                    user=session["username"],

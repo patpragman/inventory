@@ -57,7 +57,9 @@ class Database:
             for row in place_query_rows:
                 # Iterate through all the rodes, make a new node with the lat_lons
                 place = Place(row=row)
-                self.places[place.name] = place
+                place.local_id = (len(self.places) + 1)
+                # creating a new db entry with a key of the amount of items in the db + 1
+                self.places[place.local_id] = place
 
         except Exception as err:
             if isinstance(err, sqlite3.Error):
@@ -104,13 +106,13 @@ class Database:
             print(e)
             result = False
 
-    def save_places(self) -> bool:
+    def save_places(self) -> None:
         # first part is to clear the database of all the old places
         clear_rows_of("place", Database.location)
         # now we'll save the places
         # first let's write the SQL to update the db
         sql_query = """
-        insert or replace into place (
+        insert into place (
             name,
             description,
             airport_code,
@@ -138,14 +140,12 @@ class Database:
             conn.commit()
             conn.close()
 
-            result = True
-
         except sqlite3.Error as e:
             print("Error updating plaes database.  See following error:")
             print(e)
             result = False
 
-        return result
+        return None
 
     def is_in_db(self, username) -> bool:
         # takes a username and looks to see if it's in the db

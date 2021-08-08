@@ -4,23 +4,27 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 <body>
-<form action="/" method="post">
-    <div class="form-group container">
-        <h3>{{message}}</h3>
-        <label for="username_id">Username</label>
-        <input type="text" class="form-control" name="username" id="username_id">
+    <div class="container" style="margin-top: 10%;">
 
-        <label for="password_id">Password</label>
-        <input type="password" class="form-control" name="password" id="password_id">
-        <br>
-        <div>
-            <a href="/new_user" class="btn btn-primary">New User</a>
-            <input type="submit" class="btn btn-primary" value="Login">
+
+        <div class="border row-md-6" >
+            <form action="/" method="post" style="margin: 10px;">
+                <div class="form-group h-auto w-auto">
+                    <h3>{{message}}</h3>
+                    <label for="username_id">Username</label>
+                    <input type="text" class="form-control" name="username" id="username_id">
+
+                    <label for="password_id">Password</label>
+                    <input type="password" class="form-control" name="password" id="password_id">
+                    <br>
+
+                    <input  type="submit" class="btn btn-primary text-left" value="Login">
+                    <a href="/new_user" style="float: right;" class="font-weight-lighter fa-italic">New here?  Click here to register.</a>
+
+                </div>
+
+            </form>
         </div>
-
     </div>
-
-</form>
-
 </body>
 </html>

@@ -29,14 +29,16 @@
 
 
 </style>
-<body>
-<h3>Welcome, {{user.username}}.</h3>
-<a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
-<p>You can edit customer data below - be advised, they do not save unless you click save.</p>
-<label for="search_bar">Search:</label>
-<input class="form-control" id="search_bar" onkeyup="search('customer_edit_box');">
 
-<div id="customer_edit_div">
+<body>
+
+<div id="customer_edit_div" class="container">
+    <h3>Welcome, {{user.username}}.</h3>
+    <a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
+    <p>You can edit customer data below - be advised, they do not save unless you click save.</p>
+    <label for="search_bar">Search:</label>
+    <input class="form-control" id="search_bar" onkeyup="search('customer_edit_box');">
+
     {% for person in people %}
     <div class="customer_edit_box user__{{person.username}} first_name__{{person.first_name}} last_name__{{person.last_name}}" id="{{person.username}}">
         <div class="form-group">
@@ -66,9 +68,7 @@
         </div>
     </div>
     {% endfor %}
-</div>
-
-<div class="new_customer_edit_box">
+    <div class="new_customer_edit_box">
     <form action="/new_customer" method="POST">
         <div class="form-group">
             <h1>New Customer:</h1>
@@ -99,6 +99,9 @@
         </div>
     </form>
 </div>
+</div>
+
+
 
 
 <br>

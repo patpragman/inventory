@@ -44,18 +44,18 @@
 
 
 </style>
-<body>
-
-<h3>Welcome, {{user.username}}.</h3>
-<a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
-<p>You can edit items below - be advised, they do not save unless you click save.</p>
-<label for="search_bar">Search:</label>
-<input class="form-control" id="search_bar" onkeyup="search('item_edit_box');">
+<body >
 
 
 
 
-<div id="item_edit_div">
+<div id="item_edit_div" class="container">
+
+    <h3>Welcome, {{user.username}}.</h3>
+    <a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
+    <p>You can edit items below - be advised, they do not save unless you click save.</p>
+    <label for="search_bar">Search:</label>
+    <input class="form-control" id="search_bar" onkeyup="search('item_edit_box');">
 
     {% for item in items %}
     <div class="form-group item_edit_box {{item.origin}} {{item.destination}} {{item.name}} {{item.customer}} {{item.notes}}" id="{{item.id}}"  style="float: inside" >
@@ -117,56 +117,58 @@
 
     </div>
     {% endfor %}
+
+    <div class="new_item_edit_box form-group">
+        <h3>Add to the warehouse</h3>
+
+        <form action="/new_item" method="POST">
+            <label for="new_short_name">Short Description</label>
+            <input class="form-control" id="new_short_name" name="name">
+            <br>
+
+            <label for="new_description">Detailed Description</label>
+            <textarea class="form-control" id="new_description" rows=4 cols=200 name="description"></textarea>
+            <br>
+
+            <label class="form-control" for="new_checked_in_by">Checked in by:</label>
+            <select id="new_checked_in_by" name="checked_in_by">
+                {% for person in people %}
+                <option value="{{person.username}}" {% if person.username ==  user.username %} selected {% endif %} >{{person.first_name}} {{person.last_name}}</option>
+                {% endfor %}}
+            </select>
+
+            <label for="new_customer">Customer</label>
+            <select class="form-control" id="new_customer" name="customer">
+                {% for customer in people %}
+                <option value="{{customer.username}}">{{customer.first_name}} {{customer.last_name}}</option>
+                {% endfor %}}
+            </select>
+            <br>
+
+            <!--Eventually all the numbers stuff will go between these two brs-->
+            <label for="new_weight">Weight (lbs)</label>
+            <input class="form-control" id="new_weight" type="number" name="weight">
+            <br>
+
+            <label for="new_origin">From</label>
+            <select class="form-control" id="new_origin" name="origin">
+                {% for place in places %}
+                <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
+                {% endfor %}}
+            </select>
+
+            <label for="new_destination">To</label>
+            <select class="form-control" id="new_destination" name="destination">
+                {% for place in places %}
+                <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
+                {% endfor %}}
+            </select>
+
+            <input class="btn btn-primary" type="submit" value="Create">
+        </form>
+    </div>
 </div>
 
-<div class="new_item_edit_box form-group">
-    <h3>Add to the warehouse</h3>
 
-    <form action="/new_item" method="POST">
-        <label for="new_short_name">Short Description</label>
-        <input class="form-control" id="new_short_name" name="name">
-        <br>
-
-        <label for="new_description">Detailed Description</label>
-        <textarea class="form-control" id="new_description" rows=4 cols=200 name="description"></textarea>
-        <br>
-
-        <label class="form-control" for="new_checked_in_by">Checked in by:</label>
-        <select id="new_checked_in_by" name="checked_in_by">
-            {% for person in people %}
-            <option value="{{person.username}}" {% if person.username ==  user.username %} selected {% endif %} >{{person.first_name}} {{person.last_name}}</option>
-            {% endfor %}}
-        </select>
-
-        <label for="new_customer">Customer</label>
-        <select class="form-control" id="new_customer" name="customer">
-            {% for customer in people %}
-            <option value="{{customer.username}}">{{customer.first_name}} {{customer.last_name}}</option>
-            {% endfor %}}
-        </select>
-        <br>
-
-        <!--Eventually all the numbers stuff will go between these two brs-->
-        <label for="new_weight">Weight (lbs)</label>
-        <input class="form-control" id="new_weight" type="number" name="weight">
-        <br>
-
-        <label for="new_origin">From</label>
-        <select class="form-control" id="new_origin" name="origin">
-            {% for place in places %}
-            <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
-            {% endfor %}}
-        </select>
-
-        <label for="new_destination">To</label>
-        <select class="form-control" id="new_destination" name="destination">
-            {% for place in places %}
-            <option value="{{place.airport_code}}">{{place.name}} {{place.airport_code}}</option>
-            {% endfor %}}
-        </select>
-
-        <input class="btn btn-primary" type="submit" value="Create">
-    </form>
-</div>
 </body>
 </html>

@@ -30,13 +30,15 @@
 
 </style>
 <body>
-<h3>Welcome, {{user.username}}.</h3>
-<a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
-<p>You can edit location data below - be advised, they do not save unless you click save.</p>
-<label for="search_bar">Search:</label>
-<input class="form-control" id="search_bar" onkeyup="search('place_edit_box');">
+
 
 <div class="container">
+    <h3>Welcome, {{user.username}}.</h3>
+    <a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
+    <p>You can edit location data below - be advised, they do not save unless you click save.</p>
+    <label for="search_bar">Search:</label>
+    <input class="form-control" id="search_bar" onkeyup="search('place_edit_box');">
+
     <div class="place_edit_div">
         {% for place in places %}
         <div class="form-group place_edit_box {{place.name}} {{place.airport_code}} {{place.description}}" id="{{place.name}}">

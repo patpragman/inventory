@@ -12,7 +12,7 @@
 {% for item in cart %}
     <div class="cart_item">
         <form action="/cart/2/{{item.id}}" method="GET">
-            <p>{{item.mame}}</p>
+            <p>{{item.name}}</p>
             <p>{{item.description}}</p>
             <p>{{item.origin}} -> {{item.destination}}</p>
             <input type="submit" value="Remove from cart">

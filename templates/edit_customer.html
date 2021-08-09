@@ -27,19 +27,61 @@
         margin: 4px;
     }
 
+    .minimized {
+    }
+
+    .expanded {
+    }
 
 </style>
 
 <body>
 
-<div id="customer_edit_div" class="container">
-    <h3>Welcome, {{user.username}}.</h3>
-    <a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
-    <p>You can edit customer data below - be advised, they do not save unless you click save.</p>
-    <label for="search_bar">Search:</label>
-    <input class="form-control" id="search_bar" onkeyup="search('customer_edit_box');">
+    <div id="customer_edit_div" class="container">
+        <h3>Welcome, {{user.username}}.</h3>
+        <a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
+        <p>You can add customers or edit customer data below - be advised, they do not save unless you click save.</p>
+
+    <div class="new_customer_edit_box">
+        <form action="/new_customer" method="POST">
+
+            <div class="form-group">
+                <h1>New Customer:</h1>
+
+                <label for="first_name_new">First Name</label>
+                <input class="form-control"  type="text" id="first_name_new" name="first_name">
+
+                <label for="last_name_new">Last Name</label>
+                <input class="form-control"  type="text" id="last_name_new" name="last_name">
+                <br>
+
+                <label for="phone_new">Phone</label>
+                <input class="form-control"  type="text" id="phone_new"name="phone">
+
+                <label for="email_new">Email</label><br>
+                <input class="form-control"  type="text" id="email_new" name="email">
+                <br>
+
+                <label for="notes_new">Notes</label><br>
+                <textarea class="form-control" cols=50 rows=4 id="notes_new" name="notes">Enter notes here.</textarea>
+                <br>
+
+                <label for="address_new">Address</label><br>
+                <textarea class="form-control" cols=50 rows=4 id="address_new" name="address" >Please enter your address.</textarea>
+                <br><br>
+
+                <input id="submit_button" class="btn btn-primary" value="Create New User" type="submit">
+            </div>
+        </form>
+    </div>
+
+    <div style=" padding: 10px">
+        <label for="search_bar">Search:</label>
+        <input class="form-control" id="search_bar" onkeyup="search('customer_edit_box');">
+    </div>
 
     {% for person in people %}
+
     <div class="customer_edit_box user__{{person.username}} first_name__{{person.first_name}} last_name__{{person.last_name}}" id="{{person.username}}">
         <div class="form-group">
             <!--Each person input box gets a form to submit that ties to an individual in the db -->
@@ -68,37 +110,6 @@
         </div>
     </div>
     {% endfor %}
-    <div class="new_customer_edit_box">
-    <form action="/new_customer" method="POST">
-        <div class="form-group">
-            <h1>New Customer:</h1>
-
-            <label for="first_name_new">First Name</label>
-            <input class="form-control"  type="text" id="first_name_new" name="first_name">
-
-            <label for="last_name_new">Last Name</label>
-            <input class="form-control"  type="text" id="last_name_new" name="last_name">
-            <br>
-
-            <label for="phone_new">Phone</label>
-            <input class="form-control"  type="text" id="phone_new"name="phone">
-
-            <label for="email_new">Email</label><br>
-            <input class="form-control"  type="text" id="email_new" name="email">
-            <br>
-
-            <label for="notes_new">Notes</label><br>
-            <textarea class="form-control" cols=50 rows=4 id="notes_new" name="notes">Enter notes here.</textarea>
-            <br>
-
-            <label for="address_new">Address</label><br>
-            <textarea class="form-control" cols=50 rows=4 id="address_new" name="address" >Please enter your address.</textarea>
-            <br><br>
-
-            <input id="submit_button" class="btn btn-primary" value="Create New User" type="submit">
-        </div>
-    </form>
-</div>
 </div>
 
 

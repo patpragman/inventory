@@ -29,15 +29,41 @@
 
 
 </style>
-<body>
+<body class="container">
+
+    <h3>Welcome, {{user.username}}.</h3>
+    <a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
+    <p>You can add or edit location data below - be advised, they do not save unless you click save.</p>
 
 
 <div class="container">
-    <h3>Welcome, {{user.username}}.</h3>
-    <a class="font-weight-lighter fa-italic" href="/control_panel"><-Control Panel</a>
-    <p>You can edit location data below - be advised, they do not save unless you click save.</p>
-    <label for="search_bar">Search:</label>
-    <input class="form-control" id="search_bar" onkeyup="search('place_edit_box');">
+    <div class="new_place_edit_box">
+        <div class="form-group" id="new_place_form">
+
+            <h3>Create New Place</h3>
+            <form action="/new_place" method="post">
+
+                <label for="new_place_name_input">Name</label>
+                <input class="form-control" id="new_place_name_input" name="name"></label>
+
+                <label for="new_place_airport_code_input">Airport Code</label>
+                <input class="form-control" id="new_place_airport_code_input" name="airport_code">
+                <br>
+
+                <label for="new_place_description_input">Description</label>
+                <textarea class="form-control" id="new_place_description_input" name="description"></textarea>
+
+                <input class="btn btn-primary" type="submit" value="Create New Location">
+            </form>
+        </div>
+    </div>
+</div>
+    <div style="margin: 10px; padding: 10px">
+        <label for="search_bar">Search:</label>
+        <input class="form-control" id="search_bar" onkeyup="search('place_edit_box');">
+    </div>
+<div class="container">
+
 
     <div class="place_edit_div">
         {% for place in places %}
@@ -64,28 +90,7 @@
     </div>
 </div>
 
-<div class="container">
-    <div class="new_place_edit_box">
-        <div class="form-group" id="new_place_form">
 
-            <h3>Create New Place</h3>
-            <form action="/new_place" method="post">
-
-                <label for="new_place_name_input">Name</label>
-                <input class="form-control" id="new_place_name_input" name="name"></label>
-
-                <label for="new_place_airport_code_input">Airport Code</label>
-                <input class="form-control" id="new_place_airport_code_input" name="airport_code">
-                <br>
-
-                <label for="new_place_description_input">Description</label>
-                <textarea class="form-control" id="new_place_description_input" name="description"></textarea>
-
-                <input class="btn btn-primary" type="submit" value="Create New Location">
-            </form>
-        </div>
-    </div>
-</div>
 
 <br>
 </body>
